@@ -1,6 +1,5 @@
 
 add_subdirectory(utils)
-add_subdirectory(neuron)
 add_subdirectory(layer)
 
 add_executable(main main.cpp)

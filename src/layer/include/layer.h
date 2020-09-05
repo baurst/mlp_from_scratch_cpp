@@ -1,15 +1,15 @@
 #pragma once
-#include "neuron.h"
+#include "utils.h"
 #include <numeric>
 #include <vector>
 
-class Layer {
+class DenseLayer {
 public:
-  Layer(size_t number_of_inputs, size_t number_of_neurons);
-  std::vector<std::vector<float>>
-  call(const std::vector<std::vector<float>> input) const;
+  DenseLayer(size_t number_of_inputs, size_t number_of_neurons);
+  Mat2D<float> call(const Mat2D<float> &input) const;
 
 private:
-  std::vector<Neuron> neurons;
+  Mat2D<float> weights;
+  Mat2D<float> biases;
   size_t num_neurons;
 };
