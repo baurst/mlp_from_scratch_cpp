@@ -48,10 +48,11 @@ public:
   template <typename U>
   friend std::ostream &operator<<(std::ostream &os, const Mat2D<U> &);
 
+  std::vector<T> matrix_data;
+
 private:
   size_t num_rows;
   size_t num_cols;
-  std::vector<T> matrix_data;
 };
 
 template <class T>
