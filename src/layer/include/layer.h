@@ -5,7 +5,8 @@
 
 class DenseLayer {
 public:
-  DenseLayer(size_t number_of_inputs, size_t number_of_neurons);
+  DenseLayer(size_t number_of_inputs, size_t number_of_neurons,
+             Initializer init = RANDOM_UNIFORM);
   Mat2D<float> call(const Mat2D<float> &input) const;
 
 private:
