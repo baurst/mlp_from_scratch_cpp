@@ -97,9 +97,14 @@ T Mat2D<T>::operator()(size_t row_idx, size_t col_idx) const {
 
 template <class T> Mat2D<T> Mat2D<T>::dot_product(const Mat2D<T> &other) const {
 
-  Mat2D<T> result(num_cols, other.num_rows);
-  for (size_t i = 0; i < num_rows; ++i) {
-    for (size_t k = 0; k < other.num_cols; ++k) {
+  if (num_cols != other.num_rows) {
+    throw std::runtime_error(
+        "Dot Product: AxB=C -> A.num_cols != B.num_rows (size mismatch).");
+  }
+
+  Mat2D<T> result(num_rows, other.num_cols);
+  for (size_t i = 0; i < result.num_rows; ++i) {
+    for (size_t k = 0; k < result.num_cols; ++k) {
       for (size_t j = 0; j < other.num_rows; ++j) {
         result(i, k) = result(i, k) + this->operator()(i, j) * other(j, k);
       }
@@ -113,16 +118,16 @@ template <class T> Mat2D<T> Mat2D<T>::add(const Mat2D<T> &other) const {
                   std::max(other.get_num_cols(), get_num_cols()));
 
   bool rows_compatible = other.get_num_rows() == get_num_rows() ||
-                         get_num_rows() == 1 || get_num_rows() == 1;
+                         other.get_num_rows() == 1 || get_num_rows() == 1;
 
   bool cols_compatible = other.get_num_cols() == get_num_cols() ||
-                         get_num_cols() == 1 || get_num_cols() == 1;
+                         other.get_num_cols() == 1 || get_num_cols() == 1;
 
   if (!rows_compatible) {
-    throw std::runtime_error("Matrix Row dim incompatible.");
+    throw std::runtime_error("Add: Matrix Row dim incompatible.");
   }
   if (!cols_compatible) {
-    throw std::runtime_error("Matrix Cols dim incompatible.");
+    throw std::runtime_error("Add: Matrix Cols dim incompatible.");
   }
 
   if (other.get_num_rows() == get_num_rows() &&
@@ -198,3 +203,13 @@ std::ostream &operator<<(std::ostream &os, const Mat2D<T> &mat) {
 
   return os;
 }
+
+// void test_dot_prod() {
+//   std::vector<std::vector<float>> a{{1, 0}, {0, 1}};
+//   std::vector<std::vector<float>> b{{4, 1}, {2, 2}};
+
+//   const Mat2D<float> mat_a(a);
+//   const Mat2D<float> mat_b(b);
+
+//   std::cout << mat_a.dot_product(mat_b) << std::endl;
+// }
