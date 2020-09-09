@@ -1,10 +1,12 @@
 #pragma once
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <numeric>
 #include <random>
 #include <stdexcept>
 #include <vector>
+
 template <typename T> void print_vec(std::vector<T> const &vec) {
   std::cout << "[";
   for (const auto el : vec) {
@@ -35,18 +37,27 @@ enum Initializer { ZEROS, RANDOM_UNIFORM };
 
 template <class T> class Mat2D {
 public:
-  Mat2D(size_t rows, size_t cols, Initializer = ZEROS);
+  Mat2D(const size_t rows, const size_t cols, Initializer = ZEROS);
   Mat2D(std::vector<std::vector<T>> data);
+  Mat2D(const size_t num_rows, const size_t num_cols, std::vector<T> data);
   T &operator()(size_t row_idx, size_t col_idx);
   T operator()(size_t row_idx, size_t col_idx) const;
   Mat2D<T> dot_product(const Mat2D<T> &other) const;
   Mat2D<T> add(const Mat2D<T> &other) const;
+  Mat2D<T> minus(const Mat2D<T> &other) const;
+  Mat2D<T> hadamard_product(const Mat2D<T> &other) const;
+  Mat2D<T>
+  elementwise_combination_w_broadcast(const Mat2D<T> &other,
+                                      std::function<T(T, T)> modifier) const;
   Mat2D<T> transpose() const;
   size_t get_num_rows() const;
   size_t get_num_cols() const;
 
   template <typename U>
   friend std::ostream &operator<<(std::ostream &os, const Mat2D<U> &);
+
+  template <typename U> Mat2D<T> &operator+(const Mat2D<U> &classObj);
+  template <typename U> Mat2D<T> &operator-(const Mat2D<U> &classObj);
 
   std::vector<T> matrix_data;
 
@@ -56,7 +67,30 @@ private:
 };
 
 template <class T>
-Mat2D<T>::Mat2D(size_t num_rows, size_t num_cols, const Initializer init)
+template <typename U>
+Mat2D<T> &Mat2D<T>::operator+(const Mat2D<U> &other) {
+  // ...
+  return this->add(other);
+}
+
+template <class T>
+template <typename U>
+Mat2D<T> &Mat2D<T>::operator-(const Mat2D<U> &other) {
+  const Mat2D<T> minus_one(0, 0, std::vector({-1.0}));
+  return this->add(other);
+}
+
+template <class T>
+Mat2D<T>::Mat2D(const size_t num_rows, const size_t num_cols,
+                std::vector<T> data)
+    : num_rows(num_rows), num_cols(num_cols) {
+  matrix_data.resize(num_rows * num_cols);
+  matrix_data = data;
+}
+
+template <class T>
+Mat2D<T>::Mat2D(const size_t num_rows, const size_t num_cols,
+                const Initializer init)
     : num_rows(num_rows), num_cols(num_cols), matrix_data(num_rows * num_cols) {
   switch (init) {
   case ZEROS:
@@ -114,6 +148,21 @@ template <class T> Mat2D<T> Mat2D<T>::dot_product(const Mat2D<T> &other) const {
 }
 
 template <class T> Mat2D<T> Mat2D<T>::add(const Mat2D<T> &other) const {
+  return this->elementwise_combination_w_broadcast(other, std::plus<T>());
+}
+
+template <class T> Mat2D<T> Mat2D<T>::minus(const Mat2D<T> &other) const {
+  return this->elementwise_combination_w_broadcast(other, std::minus<T>());
+}
+
+template <class T>
+Mat2D<T> Mat2D<T>::hadamard_product(const Mat2D<T> &other) const {
+  return this->elementwise_combination_w_broadcast(other, std::multiplies<T>());
+}
+
+template <class T>
+Mat2D<T> Mat2D<T>::elementwise_combination_w_broadcast(
+    const Mat2D<T> &other, std::function<T(T, T)> modifier) const {
   Mat2D<T> result(std::max(other.get_num_rows(), get_num_rows()),
                   std::max(other.get_num_cols(), get_num_cols()));
 
@@ -135,8 +184,8 @@ template <class T> Mat2D<T> Mat2D<T>::add(const Mat2D<T> &other) const {
 
     for (size_t row_idx = 0; row_idx < get_num_rows(); ++row_idx) {
       for (size_t col_idx = 0; col_idx < get_num_cols(); ++col_idx) {
-        result(row_idx, col_idx) =
-            this->operator()(row_idx, col_idx) + other(row_idx, col_idx);
+        result(row_idx, col_idx) = modifier(this->operator()(row_idx, col_idx),
+                                            other(row_idx, col_idx));
       }
     }
   } else if (other.get_num_rows() == 1 || get_num_rows() == 1 ||
@@ -171,7 +220,7 @@ template <class T> Mat2D<T> Mat2D<T>::add(const Mat2D<T> &other) const {
         const T val_b = other(std::clamp(row_idx, zero, max_rows_other - 1),
                               std::clamp(col_idx, zero, max_cols_other - 1));
 
-        result(row_idx, col_idx) = val_a + val_b;
+        result(row_idx, col_idx) = modifier(val_a, val_b);
       }
     }
   }
