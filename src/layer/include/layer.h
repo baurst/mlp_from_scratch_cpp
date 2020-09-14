@@ -22,7 +22,6 @@ public:
 private:
   Mat2D<float> weights;
   Mat2D<float> biases;
-  size_t num_neurons;
 };
 
 class ActivationLayer : public Layer {

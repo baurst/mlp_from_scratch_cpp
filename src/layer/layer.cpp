@@ -9,7 +9,7 @@ Layer::~Layer(){};
 DenseLayer::DenseLayer(size_t number_of_inputs, size_t number_of_neurons,
                        Initializer init)
     : weights(number_of_inputs, number_of_neurons, init),
-      biases(1, number_of_neurons, init), num_neurons(number_of_neurons) {
+      biases(1, number_of_neurons, init) {
   std::cout << "DenseLayer: Inputs " << number_of_inputs << " Neurons "
             << number_of_neurons << std::endl;
 }
@@ -31,5 +31,5 @@ Mat2D<float> ActivationLayer::call(const Mat2D<float> &input) const {
   std::transform(result.matrix_data.begin(), result.matrix_data.end(),
                  result.matrix_data.begin(),
                  [](float x) { return std::max(static_cast<float>(0.0), x); });
-  return input;
+  return result;
 }

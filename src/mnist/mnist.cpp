@@ -7,7 +7,10 @@
 #include <stdexcept>
 #include <tuple>
 #include <vector>
-void MNISTDataset::read_mnist_csv(const std::string csv_filename) {
+std::vector<std::pair<Mat2D<float>, Mat2D<float>>>
+read_mnist_csv(const std::string csv_filename, const size_t batch_size) {
+  std::cout << "Loading MNIST dataset from " << csv_filename << std::endl;
+  std::vector<std::pair<Mat2D<float>, Mat2D<float>>> dataset;
   std::ifstream ds_file(csv_filename);
   std::string line;
   const size_t img_offset = 784;
@@ -38,30 +41,10 @@ void MNISTDataset::read_mnist_csv(const std::string csv_filename) {
     ++batch_idx;
     if (batch_idx == batch_size) {
       const auto sample = std::pair(flat_images, labels_one_hot);
-      data_samples.push_back(sample);
+      dataset.push_back(sample);
       batch_idx = 0;
     }
   }
-}
-
-MNISTDataset::MNISTDataset(std::string base_dir, size_t batch_size)
-    : base_dir(base_dir), m_current(0), batch_size(batch_size) {
-  std::cout << "Parsing data from " << base_dir << "..." << std::endl;
-  read_mnist_csv(base_dir);
-  std::cout << "Successfully parsed " << data_samples.size() * batch_size
-            << " samples from dataset" << std::endl;
-}
-
-float MNISTDataset::get_progress() const {
-  return static_cast<float>(m_current) /
-         static_cast<float>(data_samples.size());
-}
-
-bool MNISTDataset::hasNext() {
-  bool retval = m_current < data_samples.size();
-  return retval;
-}
-std::pair<Mat2D<float>, Mat2D<float>> MNISTDataset::next() {
-  m_current += 1;
-  return data_samples[m_current - 1];
+  std::cout << "Finished loading dataset" << std::endl;
+  return dataset;
 }

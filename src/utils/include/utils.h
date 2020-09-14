@@ -49,6 +49,7 @@ public:
   Mat2D<T>
   elementwise_combination_w_broadcast(const Mat2D<T> &other,
                                       std::function<T(T, T)> modifier) const;
+  T reduce_sum() const;
   Mat2D<T> transpose() const;
   size_t get_num_rows() const;
   size_t get_num_cols() const;
@@ -91,7 +92,7 @@ Mat2D<T>::Mat2D(const size_t num_rows, const size_t num_cols,
 template <class T>
 Mat2D<T>::Mat2D(const size_t num_rows, const size_t num_cols,
                 const Initializer init)
-    : num_rows(num_rows), num_cols(num_cols), matrix_data(num_rows * num_cols) {
+    : matrix_data(num_rows * num_cols), num_rows(num_rows), num_cols(num_cols) {
   switch (init) {
   case ZEROS:
     std::fill(this->matrix_data.begin(), this->matrix_data.end(),
@@ -149,6 +150,10 @@ template <class T> Mat2D<T> Mat2D<T>::dot_product(const Mat2D<T> &other) const {
 
 template <class T> Mat2D<T> Mat2D<T>::add(const Mat2D<T> &other) const {
   return this->elementwise_combination_w_broadcast(other, std::plus<T>());
+}
+
+template <class T> T Mat2D<T>::reduce_sum() const {
+  return std::accumulate(matrix_data.begin(), matrix_data.end(), T());
 }
 
 template <class T> Mat2D<T> Mat2D<T>::minus(const Mat2D<T> &other) const {

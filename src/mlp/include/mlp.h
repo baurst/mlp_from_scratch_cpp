@@ -13,6 +13,4 @@ public:
 
 private:
   std::vector<std::unique_ptr<Layer>> layers;
-  size_t number_of_inputs;
-  size_t number_of_targets;
 };
