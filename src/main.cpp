@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
       // std::cout << "Input: " << std::endl;
       // std::cout << training_input;
 
-      const auto output = mlp.call(training_input);
+      const auto output = mlp.forward(training_input);
       // std::cout << "Output: " << std::endl;
       // std::cout << output;
       const auto diff = target_label.minus(output);

@@ -16,7 +16,7 @@ DenseLayer::DenseLayer(size_t number_of_inputs, size_t number_of_neurons,
 
 DenseLayer::~DenseLayer(){};
 
-Mat2D<float> DenseLayer::call(const Mat2D<float> &input) const {
+Mat2D<float> DenseLayer::forward(const Mat2D<float> &input) const {
   const auto dot_prod = input.dot_product(weights);
   const auto result = dot_prod.add(biases);
   return result;
@@ -26,7 +26,7 @@ ActivationLayer::~ActivationLayer(){};
 
 ActivationLayer::ActivationLayer(){};
 
-Mat2D<float> ActivationLayer::call(const Mat2D<float> &input) const {
+Mat2D<float> ActivationLayer::forward(const Mat2D<float> &input) const {
   Mat2D<float> result = input;
   std::transform(result.matrix_data.begin(), result.matrix_data.end(),
                  result.matrix_data.begin(),

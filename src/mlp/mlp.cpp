@@ -19,10 +19,10 @@ MLP::MLP(const std::vector<size_t> layer_sizes, const size_t number_of_inputs,
   layers.push_back(std::make_unique<DenseLayer>(input_size, number_of_targets));
 }
 
-Mat2D<float> MLP::call(const Mat2D<float> &input) const {
+Mat2D<float> MLP::forward(const Mat2D<float> &input) const {
   Mat2D<float> output = input;
   for (const auto &layer : layers) {
-    output = layer->call(output);
+    output = layer->forward(output);
   }
   return output;
 }
