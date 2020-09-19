@@ -22,6 +22,12 @@ Mat2D<float> DenseLayer::forward(const Mat2D<float> &input) const {
   return result;
 }
 
+Mat2D<float> DenseLayer::backward(const Mat2D<float> &input,
+                                  const Mat2D<float> &gradients_output) const {
+  std::cout << "DenseLayer Gradient: TODO! " << std::endl;
+  return input;
+}
+
 ActivationLayer::~ActivationLayer(){};
 
 ActivationLayer::ActivationLayer(){};
@@ -32,4 +38,13 @@ Mat2D<float> ActivationLayer::forward(const Mat2D<float> &input) const {
                  result.matrix_data.begin(),
                  [](float x) { return std::max(static_cast<float>(0.0), x); });
   return result;
+}
+Mat2D<float>
+ActivationLayer::backward(const Mat2D<float> &input,
+                          const Mat2D<float> &gradient_output) const {
+  Mat2D<float> result = input;
+  std::transform(result.matrix_data.begin(), result.matrix_data.end(),
+                 result.matrix_data.begin(),
+                 [](float x) { return (x > 0.0) ? 1.0 : 0.0; });
+  return result.hadamard_product(gradient_output);
 }

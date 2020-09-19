@@ -6,6 +6,8 @@
 class Layer {
 public:
   virtual Mat2D<float> forward(const Mat2D<float> &input) const = 0;
+  virtual Mat2D<float> backward(const Mat2D<float> &input,
+                                const Mat2D<float> &gradients_output) const = 0;
   Layer();
   virtual ~Layer() = 0;
 
@@ -18,6 +20,8 @@ public:
              Initializer init = RANDOM_UNIFORM);
   ~DenseLayer() override;
   Mat2D<float> forward(const Mat2D<float> &input) const override;
+  Mat2D<float> backward(const Mat2D<float> &input,
+                        const Mat2D<float> &gradients_output) const override;
 
 private:
   Mat2D<float> weights;
@@ -29,6 +33,8 @@ public:
   ActivationLayer();
   ~ActivationLayer() override;
   Mat2D<float> forward(const Mat2D<float> &input) const override;
+  Mat2D<float> backward(const Mat2D<float> &input,
+                        const Mat2D<float> &gradients_output) const override;
 
 private:
 };

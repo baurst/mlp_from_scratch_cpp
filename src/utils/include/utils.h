@@ -50,6 +50,7 @@ public:
   elementwise_combination_w_broadcast(const Mat2D<T> &other,
                                       std::function<T(T, T)> modifier) const;
   T reduce_sum() const;
+  T reduce_mean() const;
   Mat2D<T> transpose() const;
   size_t get_num_rows() const;
   size_t get_num_cols() const;
@@ -94,11 +95,11 @@ Mat2D<T>::Mat2D(const size_t num_rows, const size_t num_cols,
                 const Initializer init)
     : matrix_data(num_rows * num_cols), num_rows(num_rows), num_cols(num_cols) {
   switch (init) {
-  case ZEROS:
+  case Initializer::ZEROS:
     std::fill(this->matrix_data.begin(), this->matrix_data.end(),
-              static_cast<T>(0.0));
+              static_cast<T>(0));
     break;
-  case RANDOM_UNIFORM:
+  case Initializer::RANDOM_UNIFORM:
     std::default_random_engine generator;
     std::uniform_real_distribution<T> distribution(-0.5, 0.5);
     std::generate(this->matrix_data.begin(), this->matrix_data.end(),
@@ -154,6 +155,11 @@ template <class T> Mat2D<T> Mat2D<T>::add(const Mat2D<T> &other) const {
 
 template <class T> T Mat2D<T>::reduce_sum() const {
   return std::accumulate(matrix_data.begin(), matrix_data.end(), T());
+}
+
+template <class T> T Mat2D<T>::reduce_mean() const {
+  return this->reduce_sum() / static_cast<T>(this->get_num_rows()) /
+         static_cast<T>(this->get_num_cols());
 }
 
 template <class T> Mat2D<T> Mat2D<T>::minus(const Mat2D<T> &other) const {

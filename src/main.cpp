@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
       const auto output = mlp.forward(training_input);
       // std::cout << "Output: " << std::endl;
       // std::cout << output;
-      const auto diff = target_label.minus(output);
+      const auto diff = target_label.minus(output.back());
       const auto loss_vec = diff.hadamard_product(diff);
 
       if (global_step % 1000 == 0) {
