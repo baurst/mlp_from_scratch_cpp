@@ -39,25 +39,30 @@ template <class T> class Mat2D {
 public:
   Mat2D(const size_t rows, const size_t cols, Initializer = ZEROS);
   Mat2D(std::vector<std::vector<T>> data);
+  Mat2D(const Mat2D<T> &other); // copy constructor
+  ~Mat2D();
   Mat2D(const size_t num_rows, const size_t num_cols, std::vector<T> data);
   T &operator()(size_t row_idx, size_t col_idx);
   T operator()(size_t row_idx, size_t col_idx) const;
   Mat2D<T> dot_product(const Mat2D<T> &other) const;
   Mat2D<T> add(const Mat2D<T> &other) const;
+  Mat2D<T> divide_by(const Mat2D<T> &other) const;
   Mat2D<T> minus(const Mat2D<T> &other) const;
   Mat2D<T> hadamard_product(const Mat2D<T> &other) const;
   Mat2D<T>
   elementwise_combination_w_broadcast(const Mat2D<T> &other,
                                       std::function<T(T, T)> modifier) const;
   T reduce_sum() const;
+  Mat2D<T> reduce_sum_axis(const size_t axis) const;
   T reduce_mean() const;
+  Mat2D<T> reduce_mean_axis(const size_t axis) const;
   Mat2D<T> transpose() const;
   size_t get_num_rows() const;
   size_t get_num_cols() const;
 
   template <typename U>
   friend std::ostream &operator<<(std::ostream &os, const Mat2D<U> &);
-
+  Mat2D<T> &operator=(const Mat2D<T> &other); // assignment operator
   template <typename U> Mat2D<T> &operator+(const Mat2D<U> &classObj);
   template <typename U> Mat2D<T> &operator-(const Mat2D<U> &classObj);
 
@@ -88,6 +93,23 @@ Mat2D<T>::Mat2D(const size_t num_rows, const size_t num_cols,
     : num_rows(num_rows), num_cols(num_cols) {
   matrix_data.resize(num_rows * num_cols);
   matrix_data = data;
+}
+
+template <class T>
+Mat2D<T>::Mat2D(const Mat2D<T> &other)
+    : num_rows(other.num_rows), num_cols(other.num_cols) {
+  this->matrix_data = other.matrix_data;
+}
+
+template <class T> Mat2D<T>::~Mat2D() {}
+
+template <class T> Mat2D<T> &Mat2D<T>::operator=(const Mat2D<T> &other) {
+  if (this != &other) {
+    this->num_cols = other.num_cols;
+    this->num_rows = other.num_rows;
+    this->matrix_data = other.matrix_data;
+  }
+  return *this;
 }
 
 template <class T>
@@ -157,13 +179,54 @@ template <class T> T Mat2D<T>::reduce_sum() const {
   return std::accumulate(matrix_data.begin(), matrix_data.end(), T());
 }
 
+template <class T> Mat2D<T> Mat2D<T>::reduce_sum_axis(const size_t axis) const {
+  const auto num_result_rows = (axis == 0 ? 1 : this->get_num_rows());
+  const auto num_result_cols = (axis == 1 ? 1 : this->get_num_cols());
+  Mat2D<T> result(num_result_rows, num_result_cols);
+  if (axis == 0) {
+    for (size_t col_idx = 0; col_idx < this->get_num_cols(); ++col_idx) {
+      T col_sum = static_cast<T>(0);
+      for (size_t row_idx = 0; row_idx < this->get_num_rows(); ++row_idx) {
+        col_sum += this->operator()(row_idx, col_idx);
+      }
+      result(0, col_idx) = col_sum;
+    }
+  } else if (axis == 1) {
+    for (size_t row_idx = 0; row_idx < this->get_num_rows(); ++row_idx) {
+      T row_sum = static_cast<T>(0);
+      for (size_t col_idx = 0; col_idx < this->get_num_cols(); ++col_idx) {
+        row_sum += this->operator()(row_idx, col_idx);
+      }
+      result(row_idx, 0) = row_sum;
+    }
+  } else {
+    std::runtime_error("Reduce sum: Axis must be 0 or 1.");
+  }
+  return result;
+}
+
 template <class T> T Mat2D<T>::reduce_mean() const {
   return this->reduce_sum() / static_cast<T>(this->get_num_rows()) /
          static_cast<T>(this->get_num_cols());
 }
 
+template <class T>
+Mat2D<T> Mat2D<T>::reduce_mean_axis(const size_t axis) const {
+  const auto axis_sum = this->reduce_sum_axis(axis);
+  const auto divisor =
+      (axis == 0 ? this->get_num_cols() : this->get_num_rows());
+
+  const auto axis_mean =
+      axis_sum.divide_by(Mat2D<T>(1, 1, {static_cast<T>(1.0 / divisor)}));
+  return axis_mean;
+}
+
 template <class T> Mat2D<T> Mat2D<T>::minus(const Mat2D<T> &other) const {
   return this->elementwise_combination_w_broadcast(other, std::minus<T>());
+}
+
+template <class T> Mat2D<T> Mat2D<T>::divide_by(const Mat2D<T> &other) const {
+  return this->elementwise_combination_w_broadcast(other, std::divides<T>());
 }
 
 template <class T>

@@ -43,7 +43,8 @@ Mat2D<float> MLP::predict(const Mat2D<float> &input) const {
 
 std::vector<Mat2D<float>> MLP::forward(const Mat2D<float> &input) const {
   std::vector<Mat2D<float>> activations;
-  activations.reserve(this->layers.size());
+  activations.reserve(this->layers.size() + 1);
+  activations.push_back(input);
   auto tmp_in = input;
   for (const auto &layer : layers) {
     const auto tmp_out = layer->forward(tmp_in);
@@ -54,12 +55,20 @@ std::vector<Mat2D<float>> MLP::forward(const Mat2D<float> &input) const {
 }
 
 float MLP::train(const Mat2D<float> &input, const Mat2D<float> &target_label,
-                 const float learning_rate) {
+                 const L2Loss &loss_obj, const float learning_rate) {
   const auto activations = this->forward(input);
   const auto logits = activations.back();
 
-  const auto diff = target_label.minus(logits);
-  const auto loss = diff.hadamard_product(diff);
-  // const auto d_loss_d_params =
+  const auto loss = loss_obj.loss(logits, target_label);
+  auto error =
+      (loss_obj.loss_grad(logits, target_label)).hadamard_product(logits);
+
+  size_t layer_idx = this->layers.size() - 1;
+  std::cout << " This needs to be reversed!" << std::endl;
+  for (auto &layer : this->layers) {
+    error = layer->backward(activations[layer_idx], error);
+    layer_idx--;
+  }
+
   return loss.reduce_mean();
 }
