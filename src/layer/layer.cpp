@@ -23,15 +23,17 @@ Mat2D<float> DenseLayer::forward(const Mat2D<float> &input) const {
 }
 
 Mat2D<float> DenseLayer::backward(const Mat2D<float> &input,
-                                  const Mat2D<float> &gradients_output) {
-  const auto lr_mat = Mat2D<float>(1, 1, {0.001});
+                                  const Mat2D<float> &gradients_output,
+                                  const Mat2D<float> &learning_rate) {
   const auto grad_input =
       gradients_output.dot_product(this->weights.transpose());
 
   const auto grad_weights = input.transpose().dot_product(gradients_output);
   const auto grad_biases = gradients_output.reduce_mean_axis(0);
-  this->weights = this->weights.minus(lr_mat.hadamard_product(grad_weights));
-  this->biases = this->biases.minus(lr_mat.hadamard_product(grad_biases));
+  this->weights =
+      this->weights.minus(learning_rate.hadamard_product(grad_weights));
+  this->biases =
+      this->biases.minus(learning_rate.hadamard_product(grad_biases));
 
   return grad_input;
 }
@@ -48,7 +50,8 @@ Mat2D<float> ActivationLayer::forward(const Mat2D<float> &input) const {
   return result;
 }
 Mat2D<float> ActivationLayer::backward(const Mat2D<float> &input,
-                                       const Mat2D<float> &gradient_output) {
+                                       const Mat2D<float> &gradient_output,
+                                       const Mat2D<float> &learning_rate) {
   Mat2D<float> result = input;
   std::transform(result.matrix_data.begin(), result.matrix_data.end(),
                  result.matrix_data.begin(),
@@ -56,18 +59,19 @@ Mat2D<float> ActivationLayer::backward(const Mat2D<float> &input,
   return result.hadamard_product(gradient_output);
 }
 
-L2Loss::~L2Loss(){};
+MSELoss::~MSELoss(){};
 
-L2Loss::L2Loss(){};
+MSELoss::MSELoss(){};
 
-Mat2D<float> L2Loss::loss(const Mat2D<float> &predictions,
-                          const Mat2D<float> &labels) const {
+Mat2D<float> MSELoss::loss(const Mat2D<float> &predictions,
+                           const Mat2D<float> &labels) const {
   const auto diff = labels.minus(predictions);
   const auto loss = diff.hadamard_product(diff);
   return loss;
 }
 
-Mat2D<float> L2Loss::loss_grad(const Mat2D<float> &predictions,
-                               const Mat2D<float> &labels) const {
+Mat2D<float> MSELoss::loss_grad(const Mat2D<float> &predictions,
+                                const Mat2D<float> &labels) const {
+  // partial derivative of Loss for the predictions
   return predictions.minus(labels);
 }

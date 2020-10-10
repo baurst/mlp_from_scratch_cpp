@@ -7,7 +7,8 @@ class Layer {
 public:
   virtual Mat2D<float> forward(const Mat2D<float> &input) const = 0;
   virtual Mat2D<float> backward(const Mat2D<float> &input,
-                                const Mat2D<float> &gradients_output) = 0;
+                                const Mat2D<float> &gradients_output,
+                                const Mat2D<float> &learning_rate) = 0;
   Layer();
   virtual ~Layer() = 0;
 
@@ -21,7 +22,8 @@ public:
   ~DenseLayer() override;
   Mat2D<float> forward(const Mat2D<float> &input) const override;
   Mat2D<float> backward(const Mat2D<float> &input,
-                        const Mat2D<float> &gradients_output) override;
+                        const Mat2D<float> &gradients_output,
+                        const Mat2D<float> &learning_rate) override;
 
 private:
   Mat2D<float> weights;
@@ -34,19 +36,20 @@ public:
   ~ActivationLayer() override;
   Mat2D<float> forward(const Mat2D<float> &input) const override;
   Mat2D<float> backward(const Mat2D<float> &input,
-                        const Mat2D<float> &gradients_output) override;
+                        const Mat2D<float> &gradients_output,
+                        const Mat2D<float> &learning_rate) override;
 
 private:
 };
 
-class L2Loss {
+class MSELoss {
 public:
   Mat2D<float> loss(const Mat2D<float> &predictions,
                     const Mat2D<float> &labels) const;
   Mat2D<float> loss_grad(const Mat2D<float> &predictions,
                          const Mat2D<float> &labels) const;
-  L2Loss();
-  ~L2Loss();
+  MSELoss();
+  ~MSELoss();
 
 private:
 };

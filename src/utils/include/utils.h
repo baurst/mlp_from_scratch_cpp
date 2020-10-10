@@ -123,7 +123,7 @@ Mat2D<T>::Mat2D(const size_t num_rows, const size_t num_cols,
     break;
   case Initializer::RANDOM_UNIFORM:
     std::default_random_engine generator;
-    std::uniform_real_distribution<T> distribution(-0.5, 0.5);
+    std::uniform_real_distribution<T> distribution(-0.1, 0.1);
     std::generate(this->matrix_data.begin(), this->matrix_data.end(),
                   [&]() { return distribution(generator); });
     break;

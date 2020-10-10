@@ -12,7 +12,7 @@ public:
   std::vector<Mat2D<float>> forward(const Mat2D<float> &input) const;
   Mat2D<float> predict(const Mat2D<float> &input) const;
   float train(const Mat2D<float> &input, const Mat2D<float> &target,
-              const L2Loss &loss_obj, const float learning_rate);
+              const MSELoss &loss_obj, const Mat2D<float> &learning_rate);
 
 private:
   std::vector<std::unique_ptr<Layer>> layers;

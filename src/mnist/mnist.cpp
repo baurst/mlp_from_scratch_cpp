@@ -4,7 +4,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <stdexcept>
 #include <tuple>
 #include <vector>
 std::vector<std::pair<Mat2D<float>, Mat2D<float>>>

@@ -10,7 +10,7 @@ float progress(const size_t counter, const size_t ds_size) {
 }
 int main(int argc, char *argv[]) {
   std::string mnist_train_ds_path =
-      "/lhome/baurst/priv_projects/cpp_mlp/data/mnist_test.csv";
+      "/lhome/baurst/priv_projects/cpp_mlp/data/mnist_train.csv";
   if (argc == 1) {
     std::cout << "No path passed to dataset, using default path"
               << mnist_train_ds_path << std::endl;
@@ -28,20 +28,20 @@ int main(int argc, char *argv[]) {
 
   auto mlp = MLP(layer_sizes, 784, 10);
 
-  const size_t num_train_epochs = 1;
+  const size_t num_train_epochs = 10;
   const size_t batch_size = 4;
-  const auto l2_loss_obj = L2Loss();
+  const auto mse_loss_obj = MSELoss();
   const auto train_ds = read_mnist_csv(mnist_train_ds_path, batch_size);
   size_t global_step = 0;
+  const auto learning_rate = Mat2D<float>(1, 1, {0.000001});
   for (size_t epoch = 0; epoch < num_train_epochs; ++epoch) {
     size_t ds_sample_counter = 0;
     for (const auto &mnist_el : train_ds) {
       const auto [training_input, target_label] = mnist_el;
 
       const auto loss =
-          mlp.train(training_input, target_label, l2_loss_obj, 1e-4);
-
-      if (global_step % 1000 == 0) {
+          mlp.train(training_input, target_label, mse_loss_obj, learning_rate);
+      if (global_step % 100 == 0) {
         std::cout << "Epoch: " << std::setw(3) << std::setprecision(3) << epoch
                   << " - Progress: " << std::setw(5) << std::setprecision(3)
                   << progress(ds_sample_counter, train_ds.size())

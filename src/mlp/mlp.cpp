@@ -1,9 +1,10 @@
 #include "mlp.h"
 #include "layer.h"
 #include "utils.h"
-#include <memory>
-
 #include <iostream>
+#include <math.h>
+#include <memory>
+#include <stdexcept>
 #include <vector>
 
 MLP::MLP(const std::vector<size_t> layer_sizes, const size_t number_of_inputs,
@@ -55,7 +56,7 @@ std::vector<Mat2D<float>> MLP::forward(const Mat2D<float> &input) const {
 }
 
 float MLP::train(const Mat2D<float> &input, const Mat2D<float> &target_label,
-                 const L2Loss &loss_obj, const float learning_rate) {
+                 const MSELoss &loss_obj, const Mat2D<float> &learning_rate) {
   const auto activations = this->forward(input);
   const auto logits = activations.back();
 
@@ -63,11 +64,10 @@ float MLP::train(const Mat2D<float> &input, const Mat2D<float> &target_label,
   auto error =
       (loss_obj.loss_grad(logits, target_label)).hadamard_product(logits);
 
-  size_t layer_idx = this->layers.size() - 1;
-  std::cout << " This needs to be reversed!" << std::endl;
-  for (auto &layer : this->layers) {
-    error = layer->backward(activations[layer_idx], error);
-    layer_idx--;
+  for (int32_t layer_idx = this->layers.size() - 1; layer_idx >= 0;
+       --layer_idx) {
+    error = this->layers[layer_idx]->backward(activations[layer_idx], error,
+                                              learning_rate);
   }
 
   return loss.reduce_mean();
