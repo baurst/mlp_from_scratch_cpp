@@ -14,12 +14,13 @@ read_mnist_csv(const std::string csv_filename, const size_t batch_size) {
   std::ifstream ds_file(csv_filename);
   std::string line;
   const size_t img_offset = 784;
-  std::vector<std::string> line_split;
   size_t batch_idx = 0;
   Mat2D<float> labels_one_hot(batch_size, 10, Initializer::ZEROS);
   Mat2D<float> flat_images(batch_size, 784, Initializer::ZEROS);
   while (std::getline(ds_file, line)) {
+    std::vector<std::string> line_split;
     std::stringstream ss(line);
+
     while (ss.good()) {
       std::string substr;
       std::getline(ss, substr, ',');
@@ -40,7 +41,7 @@ read_mnist_csv(const std::string csv_filename, const size_t batch_size) {
 
     ++batch_idx;
     if (batch_idx == batch_size) {
-      dataset.push_back(std::pair(flat_images, labels_one_hot));
+      dataset.push_back(std::make_pair(flat_images, labels_one_hot));
       batch_idx = 0;
     }
   }

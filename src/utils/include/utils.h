@@ -39,8 +39,8 @@ template <class T> class Mat2D {
 public:
   Mat2D(const size_t rows, const size_t cols, Initializer = ZEROS);
   Mat2D(std::vector<std::vector<T>> data);
-  Mat2D(const Mat2D<T> &other); // copy constructor
-  ~Mat2D();
+  // Mat2D(const Mat2D<T> &other); // copy constructor
+  //~Mat2D();
   Mat2D(const size_t num_rows, const size_t num_cols, std::vector<T> data);
   T &operator()(size_t row_idx, size_t col_idx);
   T operator()(size_t row_idx, size_t col_idx) const;
@@ -62,7 +62,7 @@ public:
 
   template <typename U>
   friend std::ostream &operator<<(std::ostream &os, const Mat2D<U> &);
-  Mat2D<T> &operator=(const Mat2D<T> &other); // assignment operator
+  // Mat2D<T> &operator=(const Mat2D<T> &other); // assignment operator
   template <typename U> Mat2D<T> &operator+(const Mat2D<U> &classObj);
   template <typename U> Mat2D<T> &operator-(const Mat2D<U> &classObj);
 
@@ -94,7 +94,7 @@ Mat2D<T>::Mat2D(const size_t num_rows, const size_t num_cols,
   matrix_data.resize(num_rows * num_cols);
   matrix_data = data;
 }
-
+/*
 template <class T>
 Mat2D<T>::Mat2D(const Mat2D<T> &other)
     : num_rows(other.num_rows), num_cols(other.num_cols) {
@@ -111,7 +111,7 @@ template <class T> Mat2D<T> &Mat2D<T>::operator=(const Mat2D<T> &other) {
   }
   return *this;
 }
-
+*/
 template <class T>
 Mat2D<T>::Mat2D(const size_t num_rows, const size_t num_cols,
                 const Initializer init)
