@@ -65,7 +65,7 @@ MSELoss::MSELoss(){};
 
 Mat2D<float> MSELoss::loss(const Mat2D<float> &predictions,
                            const Mat2D<float> &labels) const {
-  const auto diff = labels.minus(predictions);
+  const auto diff = predictions.minus(labels);
   const auto loss = diff.hadamard_product(diff);
   return loss;
 }

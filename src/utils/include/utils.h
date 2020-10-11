@@ -56,6 +56,7 @@ public:
   Mat2D<T> reduce_sum_axis(const size_t axis) const;
   T reduce_mean() const;
   Mat2D<T> reduce_mean_axis(const size_t axis) const;
+  Mat2D<size_t> argmax(const size_t axis) const;
   Mat2D<T> transpose() const;
   size_t get_num_rows() const;
   size_t get_num_cols() const;
@@ -123,9 +124,9 @@ Mat2D<T>::Mat2D(const size_t num_rows, const size_t num_cols,
     break;
   case Initializer::RANDOM_UNIFORM:
     std::default_random_engine generator;
-    std::uniform_real_distribution<T> distribution(-0.1, 0.1);
+    std::uniform_real_distribution<double> distribution(-0.1, 0.1);
     std::generate(this->matrix_data.begin(), this->matrix_data.end(),
-                  [&]() { return distribution(generator); });
+                  [&]() { return static_cast<T>(distribution(generator)); });
     break;
   }
 }
@@ -177,6 +178,44 @@ template <class T> Mat2D<T> Mat2D<T>::add(const Mat2D<T> &other) const {
 
 template <class T> T Mat2D<T>::reduce_sum() const {
   return std::accumulate(matrix_data.begin(), matrix_data.end(), T());
+}
+
+template <class T> Mat2D<size_t> Mat2D<T>::argmax(const size_t axis) const {
+  const auto num_result_rows = (axis == 0 ? 1 : this->get_num_rows());
+  const auto num_result_cols = (axis == 0 ? this->get_num_cols() : 1);
+
+  Mat2D<size_t> argmax_indices(num_result_rows, num_result_cols);
+
+  if (axis == 0) {
+    for (size_t col_idx = 0; col_idx < this->get_num_cols(); ++col_idx) {
+      T row_max = static_cast<T>(0);
+      size_t row_max_idx = 0;
+      for (size_t row_idx = 0; row_idx < this->get_num_rows(); ++row_idx) {
+        const auto entry = this->operator()(row_idx, col_idx);
+        if (entry > row_max) {
+          row_max = entry;
+          row_max_idx = row_idx;
+        }
+      }
+      argmax_indices(0, col_idx) = row_max_idx;
+    }
+  } else if (axis == 1) {
+    for (size_t row_idx = 0; row_idx < this->get_num_rows(); ++row_idx) {
+      T col_max = static_cast<T>(0);
+      size_t col_max_idx = 0;
+      for (size_t col_idx = 0; col_idx < this->get_num_cols(); ++col_idx) {
+        const auto entry = this->operator()(row_idx, col_idx);
+        if (entry > col_max) {
+          col_max = entry;
+          col_max_idx = col_idx;
+        }
+      }
+      argmax_indices(row_idx, 0) = col_max_idx;
+    }
+  } else {
+    std::runtime_error("Reduce sum: Axis must be 0 or 1.");
+  }
+  return argmax_indices;
 }
 
 template <class T> Mat2D<T> Mat2D<T>::reduce_sum_axis(const size_t axis) const {
