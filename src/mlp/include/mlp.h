@@ -11,7 +11,7 @@ public:
       const size_t number_of_targets, const Initializer init = RANDOM_UNIFORM);
   std::vector<Mat2D<float>> forward(const Mat2D<float> &input) const;
   float train(const Mat2D<float> &input, const Mat2D<float> &target,
-              const MSELoss &loss_obj, const Mat2D<float> &learning_rate);
+              const Loss &loss_obj, const Mat2D<float> &learning_rate);
   Mat2D<size_t> predict(const Mat2D<float> &input) const;
 
 private:

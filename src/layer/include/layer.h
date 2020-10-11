@@ -30,10 +30,10 @@ private:
   Mat2D<float> biases;
 };
 
-class ActivationLayer : public Layer {
+class RELUActivationLayer : public Layer {
 public:
-  ActivationLayer();
-  ~ActivationLayer() override;
+  RELUActivationLayer();
+  ~RELUActivationLayer() override;
   Mat2D<float> forward(const Mat2D<float> &input) const override;
   Mat2D<float> backward(const Mat2D<float> &input,
                         const Mat2D<float> &gradients_output,
@@ -42,14 +42,38 @@ public:
 private:
 };
 
-class MSELoss {
+class Loss {
+public:
+  virtual Mat2D<float> loss(const Mat2D<float> &predictions,
+                            const Mat2D<float> &labels) const = 0;
+  virtual Mat2D<float> loss_grad(const Mat2D<float> &predictions,
+                                 const Mat2D<float> &labels) const = 0;
+  Loss();
+  ~Loss();
+
+private:
+};
+
+class MSELoss : public Loss {
+public:
+  Mat2D<float> loss(const Mat2D<float> &predictions,
+                    const Mat2D<float> &labels) const override;
+  Mat2D<float> loss_grad(const Mat2D<float> &predictions,
+                         const Mat2D<float> &labels) const override;
+  MSELoss();
+  ~MSELoss();
+
+private:
+};
+
+class CELoss : public Loss {
 public:
   Mat2D<float> loss(const Mat2D<float> &predictions,
                     const Mat2D<float> &labels) const;
   Mat2D<float> loss_grad(const Mat2D<float> &predictions,
                          const Mat2D<float> &labels) const;
-  MSELoss();
-  ~MSELoss();
+  CELoss();
+  ~CELoss();
 
 private:
 };

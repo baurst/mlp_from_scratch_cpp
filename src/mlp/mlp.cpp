@@ -15,7 +15,7 @@ MLP::MLP(const std::vector<size_t> layer_sizes, const size_t number_of_inputs,
     layers.push_back(
         std::make_unique<DenseLayer>(input_size, layer_size, init));
     input_size = layer_size;
-    layers.push_back(std::make_unique<ActivationLayer>());
+    layers.push_back(std::make_unique<RELUActivationLayer>());
   }
   layers.push_back(std::make_unique<DenseLayer>(input_size, number_of_targets));
 }
@@ -34,7 +34,7 @@ std::vector<Mat2D<float>> MLP::forward(const Mat2D<float> &input) const {
 }
 
 float MLP::train(const Mat2D<float> &input, const Mat2D<float> &target_label,
-                 const MSELoss &loss_obj, const Mat2D<float> &learning_rate) {
+                 const Loss &loss_obj, const Mat2D<float> &learning_rate) {
   const auto activations = this->forward(input);
   const auto logits = activations.back();
   auto logits_deriv = logits;

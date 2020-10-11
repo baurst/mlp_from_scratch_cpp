@@ -52,6 +52,7 @@ public:
   Mat2D<T>
   elementwise_combination_w_broadcast(const Mat2D<T> &other,
                                       std::function<T(T, T)> modifier) const;
+  Mat2D<T> elementwise_operation(std::function<T(T)> modifier);
   T reduce_sum() const;
   Mat2D<T> reduce_sum_axis(const size_t axis) const;
   T reduce_mean() const;
@@ -66,6 +67,7 @@ public:
   // Mat2D<T> &operator=(const Mat2D<T> &other); // assignment operator
   template <typename U> Mat2D<T> &operator+(const Mat2D<U> &classObj);
   template <typename U> Mat2D<T> &operator-(const Mat2D<U> &classObj);
+  Mat2D<T> operator-();
 
   std::vector<T> matrix_data;
 
@@ -79,6 +81,12 @@ template <typename U>
 Mat2D<T> &Mat2D<T>::operator+(const Mat2D<U> &other) {
   // ...
   return this->add(other);
+}
+
+template <class T> Mat2D<T> Mat2D<T>::operator-() {
+  const auto result =
+      this->elementwise_operation([](T x) { return static_cast<T>(-1.0) * x; });
+  return result;
 }
 
 template <class T>
@@ -153,6 +161,12 @@ template <class T>
 T Mat2D<T>::operator()(size_t row_idx, size_t col_idx) const {
   return matrix_data[row_idx * num_cols + col_idx];
 }
+template <class T>
+Mat2D<T> Mat2D<T>::elementwise_operation(std::function<T(T)> modifier) {
+  std::for_each(std::begin(this->matrix_data), std::end(this->matrix_data),
+                [&](T x) { return modifier(x); });
+  return *this;
+}
 
 template <class T> Mat2D<T> Mat2D<T>::dot_product(const Mat2D<T> &other) const {
 
@@ -188,7 +202,7 @@ template <class T> Mat2D<size_t> Mat2D<T>::argmax(const size_t axis) const {
 
   if (axis == 0) {
     for (size_t col_idx = 0; col_idx < this->get_num_cols(); ++col_idx) {
-      T row_max = static_cast<T>(0);
+      T row_max = -std::numeric_limits<T>::infinity();
       size_t row_max_idx = 0;
       for (size_t row_idx = 0; row_idx < this->get_num_rows(); ++row_idx) {
         const auto entry = this->operator()(row_idx, col_idx);
@@ -201,7 +215,7 @@ template <class T> Mat2D<size_t> Mat2D<T>::argmax(const size_t axis) const {
     }
   } else if (axis == 1) {
     for (size_t row_idx = 0; row_idx < this->get_num_rows(); ++row_idx) {
-      T col_max = static_cast<T>(0);
+      T col_max = -std::numeric_limits<T>::infinity();
       size_t col_max_idx = 0;
       for (size_t col_idx = 0; col_idx < this->get_num_cols(); ++col_idx) {
         const auto entry = this->operator()(row_idx, col_idx);

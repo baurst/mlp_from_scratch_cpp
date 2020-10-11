@@ -10,7 +10,6 @@
 float progress(const size_t counter, const size_t ds_size) {
   return static_cast<float>(counter) / static_cast<float>(ds_size);
 }
-
 float run_validation(
     const MLP &network,
     const std::vector<std::pair<Mat2D<float>, Mat2D<float>>> &dataset,
@@ -69,7 +68,7 @@ int main(int argc, char *argv[]) {
 
   const size_t num_train_epochs = 10;
   const size_t batch_size = 64;
-  const auto mse_loss_obj = MSELoss();
+  const auto mse_loss_obj = CELoss();
   const auto train_ds = read_mnist_csv(mnist_train_ds_path, batch_size);
   const auto test_ds = read_mnist_csv(mnist_test_ds_path, 20);
   size_t global_step = 0;
