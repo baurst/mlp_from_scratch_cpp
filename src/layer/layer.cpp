@@ -73,5 +73,7 @@ Mat2D<float> MSELoss::loss(const Mat2D<float> &predictions,
 Mat2D<float> MSELoss::loss_grad(const Mat2D<float> &predictions,
                                 const Mat2D<float> &labels) const {
   // partial derivative of Loss for the predictions
-  return predictions.minus(labels);
+  Mat2D<float> divisor(1, 1,
+                       {1.0f / static_cast<float>(predictions.get_num_rows())});
+  return predictions.minus(labels).hadamard_product(divisor);
 }

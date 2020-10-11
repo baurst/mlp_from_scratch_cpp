@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Using mnist csv root dir " << mnist_train_ds_path
               << std::endl;
   }
-  std::vector<size_t> layer_sizes = {784, 200, 80};
+  std::vector<size_t> layer_sizes = {200, 80};
 
   auto mlp = MLP(layer_sizes, 784, 10);
 
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
   const auto test_ds = read_mnist_csv(mnist_test_ds_path, 20);
   size_t global_step = 0;
   const size_t num_online_val_steps = 100;
-  const auto learning_rate = Mat2D<float>(1, 1, {0.001});
+  const auto learning_rate = Mat2D<float>(1, 1, {0.01});
   std::cout << "Epoch: " << std::setw(3) << std::setprecision(3) << 0
             << " - Online VAL Accuracy: "
             << run_validation(mlp, test_ds, num_online_val_steps) * 100.0 << "%"
@@ -96,8 +96,8 @@ int main(int argc, char *argv[]) {
         std::cout << "Epoch: " << std::setw(3) << std::setprecision(3) << epoch
                   << " - Progress: " << std::setw(5) << std::setprecision(3)
                   << progress(ds_sample_counter, train_ds.size())
-                  << " - Loss: " << std::setw(5) << std::setprecision(4) << loss
-                  << std::endl;
+                  << " - Avg. Loss: " << std::setw(5) << std::setprecision(4)
+                  << loss << std::endl;
       }
       global_step++;
       ds_sample_counter++;
@@ -107,5 +107,10 @@ int main(int argc, char *argv[]) {
               << run_validation(mlp, test_ds, num_online_val_steps) * 100.0
               << "%" << std::endl;
   }
+
+  std::cout << "Epoch: " << std::setw(3) << std::setprecision(3) << 0
+            << " - Complete VAL Accuracy: "
+            << run_validation(mlp, test_ds, test_ds.size()) * 100.0 << "%"
+            << std::endl;
   return 0;
 }
