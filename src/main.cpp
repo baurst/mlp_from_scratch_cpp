@@ -74,16 +74,16 @@ int main(int argc, char *argv[]) {
 
   auto mlp = MLP(layer_sizes, 784, 10);
 
-  const size_t num_train_epochs = 100;
-  const size_t batch_size = 16;
+  const size_t num_train_epochs = 100000;
+  const size_t batch_size = 1;
   // const size_t batch_size = 64;
-  const auto num_train_samples = 3;
+  const auto num_train_samples = 1;
   // const auto num_train_samples = 5;
   const auto mse_loss_obj = SoftmaxCrossEntropyWithLogitsLoss();
   const auto train_ds =
       read_mnist_csv(mnist_train_ds_path, batch_size, num_train_samples);
   const auto val_on_train_ds =
-      read_mnist_csv(mnist_train_ds_path, batch_size, 2);
+      read_mnist_csv(mnist_train_ds_path, batch_size, 1);
   const auto test_ds = read_mnist_csv(mnist_test_ds_path, 20, -1);
   size_t global_step = 0;
   const size_t num_online_val_steps = 20;
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
   const size_t online_val_every_n_steps = 500;
   const size_t num_online_val_on_train_steps = 2;
   const size_t log_loss_every_n_steps = 1;
-  const auto learning_rate = Mat2D<float>(1, 1, {0.001});
+  const auto learning_rate = Mat2D<float>(1, 1, {0.1});
 
   auto rng = std::default_random_engine{};
 
@@ -118,12 +118,12 @@ int main(int argc, char *argv[]) {
     }
     // log_metric(run_validation(mlp, test_ds, num_online_val_steps),
     //            "Online VAL Accuracy", global_step);
-    log_metric(
-        run_validation(mlp, val_on_train_ds, num_val_steps_after_each_epoch),
-        "Online VAL ON TRAIN Accuracy", global_step);
+    // log_metric(
+    //     run_validation(mlp, val_on_train_ds, num_val_steps_after_each_epoch),
+    //     "Online VAL ON TRAIN Accuracy", global_step);
 
-    std::cout << "Epoch: " << std::setw(3) << std::setprecision(3) << epoch
-              << " finished!" << std::endl;
+    // std::cout << "Epoch: " << std::setw(3) << std::setprecision(3) << epoch
+    //           << " finished!" << std::endl;
   }
   log_metric(run_validation(mlp, test_ds, test_ds.size()),
              "Complete VAL Accuracy", global_step);

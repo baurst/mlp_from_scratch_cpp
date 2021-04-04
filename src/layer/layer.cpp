@@ -10,8 +10,8 @@ DenseLayer::DenseLayer(size_t number_of_inputs, size_t number_of_neurons,
                        Initializer init)
     : weights(number_of_inputs, number_of_neurons, init),
       biases(1, number_of_neurons, init) {
-  std::cout << "DenseLayer: Inputs " << number_of_inputs << " Neurons "
-            << number_of_neurons << std::endl;
+  // std::cout << "DenseLayer: Inputs " << number_of_inputs << " Neurons "
+  //<< number_of_neurons << std::endl;
 }
 
 DenseLayer::~DenseLayer(){};
@@ -86,7 +86,7 @@ SoftmaxCrossEntropyWithLogitsLoss::SoftmaxCrossEntropyWithLogitsLoss(){};
 
 Mat2D<float> softmax(const Mat2D<float> &logits) {
   auto logits_tmp = logits;
-  std::cout << "Logits:" << std::endl << logits_tmp << std::endl;
+  // std::cout << "Logits:" << std::endl << logits_tmp << std::endl;
 
   const auto logits_max = logits_tmp.reduce_max_axis(1);
 
@@ -94,11 +94,11 @@ Mat2D<float> softmax(const Mat2D<float> &logits) {
 
   const auto logits_exp =
       logits_tmp.elementwise_operation([](float x) { return std::exp(x); });
-  std::cout << "logits_exp:" << std::endl << logits_exp << std::endl;
+  // std::cout << "logits_exp:" << std::endl << logits_exp << std::endl;
 
   auto logits_exp_sum = logits_exp.reduce_sum_axis(1);
   auto probs = logits_exp.divide_by(logits_exp_sum);
-  std::cout << "Probs:" << std::endl << probs << std::endl;
+  // std::cout << "Probs:" << std::endl << probs << std::endl;
 
   return probs;
 }
@@ -106,13 +106,13 @@ Mat2D<float>
 SoftmaxCrossEntropyWithLogitsLoss::loss(const Mat2D<float> &predictions,
                                         const Mat2D<float> &labels) const {
   auto pred_probs = softmax(predictions);
-  // std::cout << pred_probs << std::endl;
-  // std::cout << pred_probs.reduce_sum_axis(1) << std::endl;
+  // //std::cout << pred_probs << std::endl;
+  // //std::cout << pred_probs.reduce_sum_axis(1) << std::endl;
 
   const auto log_probs =
       pred_probs.elementwise_operation([](float x) { return std::log(x); });
 
-  std::cout << log_probs << std::endl;
+  // std::cout << log_probs << std::endl;
   const auto ce = -(labels.hadamard_product(log_probs).reduce_sum_axis(1));
   return ce;
 }
