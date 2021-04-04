@@ -37,22 +37,29 @@ float MLP::train(const Mat2D<float> &input, const Mat2D<float> &target_label,
                  const Loss &loss_obj, const Mat2D<float> &learning_rate) {
   const auto activations = this->forward(input);
   const auto logits = activations.back();
+  const auto loss = loss_obj.loss(logits, target_label);
+  const auto avg_loss = loss.reduce_mean();
+  if (avg_loss > 5.0) {
+    std::cout << "about to crash!" << std::endl;
+  }
 
   auto grad = loss_obj.loss_grad(logits, target_label);
 
   // auto error =
   //     (loss_obj.loss_grad(logits,
   //     target_label)).hadamard_product(logits_deriv);
+  std::cout << "grad: " << std::endl << grad << std::endl;
 
   for (int32_t layer_idx = this->layers.size() - 1; layer_idx >= 0;
        --layer_idx) {
+    // std::cout << "grad: " << layer_idx << std::endl << grad << std::endl;
+
     grad = this->layers[layer_idx]->backward(activations[layer_idx], grad,
                                              learning_rate);
   }
-  const auto loss = loss_obj.loss(logits, target_label);
-  const auto avg_loss = loss.reduce_mean();
 
   if (std::isnan(avg_loss)) {
+    std::cout.flush();
     throw std::runtime_error("Encountered NAN in loss!");
   }
   return avg_loss;

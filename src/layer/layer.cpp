@@ -27,7 +27,11 @@ Mat2D<float> DenseLayer::backward(const Mat2D<float> &input,
                                   const Mat2D<float> &learning_rate) {
   const auto grad_input =
       gradients_output.dot_product(this->weights.transpose());
-  const auto grad_weights = input.transpose().dot_product(gradients_output);
+  const auto grad_weights =
+      input.transpose()
+          .dot_product(gradients_output)
+          .divide_by(Mat2D<float>(
+              1, 1, {static_cast<float>(gradients_output.get_num_rows())}));
   const auto grad_biases = gradients_output.reduce_mean_axis(0);
 
   const auto weight_update = learning_rate.hadamard_product(grad_weights);
@@ -43,19 +47,20 @@ RELUActivationLayer::~RELUActivationLayer(){};
 RELUActivationLayer::RELUActivationLayer(){};
 
 Mat2D<float> RELUActivationLayer::forward(const Mat2D<float> &input) const {
-  Mat2D<float> result = input;
-  std::transform(result.matrix_data.begin(), result.matrix_data.end(),
-                 result.matrix_data.begin(),
-                 [](float x) { return std::max(static_cast<float>(0.0), x); });
+  auto tmp_in = input;
+  Mat2D<float> result = tmp_in.elementwise_operation(
+      // [](float x) { return std::max(0.0f, x); });
+      [](float x) { return std::max(0.1f * x, x); });
+
   return result;
 }
 Mat2D<float> RELUActivationLayer::backward(const Mat2D<float> &input,
                                            const Mat2D<float> &gradient_output,
                                            const Mat2D<float> &learning_rate) {
-  Mat2D<float> result = input;
-  std::transform(result.matrix_data.begin(), result.matrix_data.end(),
-                 result.matrix_data.begin(),
-                 [](float x) { return (x > 0.0) ? 1.0 : 0.0; });
+  auto tmp_in = input;
+  Mat2D<float> result = tmp_in.elementwise_operation(
+      // [](float x) { return (x > 0.0) ? 1.0 : 0.0; });
+      [](float x) { return (x > 0.0) ? 1.0 : 0.1; });
   return result.hadamard_product(gradient_output);
 }
 
@@ -106,8 +111,8 @@ Mat2D<float>
 SoftmaxCrossEntropyWithLogitsLoss::loss(const Mat2D<float> &predictions,
                                         const Mat2D<float> &labels) const {
   auto pred_probs = softmax(predictions);
-  // //std::cout << pred_probs << std::endl;
-  // //std::cout << pred_probs.reduce_sum_axis(1) << std::endl;
+  // std::cout << pred_probs << std::endl;
+  // std::cout << pred_probs.reduce_sum_axis(1) << std::endl;
 
   const auto log_probs =
       pred_probs.elementwise_operation([](float x) { return std::log(x); });
@@ -124,5 +129,7 @@ SoftmaxCrossEntropyWithLogitsLoss::loss_grad(const Mat2D<float> &predictions,
   // average gradient over minibatch
   auto pred_tmp = predictions;
   const auto pred_probs = softmax(pred_tmp);
-  return pred_probs.minus(labels);
+  const auto mean_grad = pred_probs.minus(labels); //.reduce_mean_axis(0);
+
+  return mean_grad;
 }
