@@ -42,6 +42,18 @@ public:
 private:
 };
 
+class SoftmaxActivationLayer : public Layer {
+public:
+  SoftmaxActivationLayer();
+  ~SoftmaxActivationLayer() override;
+  Mat2D<float> forward(const Mat2D<float> &input) const override;
+  Mat2D<float> backward(const Mat2D<float> &input,
+                        const Mat2D<float> &gradients_output,
+                        const Mat2D<float> &learning_rate) override;
+
+private:
+};
+
 class Loss {
 public:
   virtual Mat2D<float> loss(const Mat2D<float> &predictions,
@@ -66,14 +78,14 @@ public:
 private:
 };
 
-class CELoss : public Loss {
+class SoftmaxCrossEntropyWithLogitsLoss : public Loss {
 public:
   Mat2D<float> loss(const Mat2D<float> &predictions,
                     const Mat2D<float> &labels) const;
   Mat2D<float> loss_grad(const Mat2D<float> &predictions,
                          const Mat2D<float> &labels) const;
-  CELoss();
-  ~CELoss();
+  SoftmaxCrossEntropyWithLogitsLoss();
+  ~SoftmaxCrossEntropyWithLogitsLoss();
 
 private:
 };

@@ -37,18 +37,17 @@ float MLP::train(const Mat2D<float> &input, const Mat2D<float> &target_label,
                  const Loss &loss_obj, const Mat2D<float> &learning_rate) {
   const auto activations = this->forward(input);
   const auto logits = activations.back();
-  auto logits_deriv = logits;
-  std::transform(logits_deriv.matrix_data.begin(),
-                 logits_deriv.matrix_data.end(),
-                 logits_deriv.matrix_data.begin(),
-                 [](float x) { return (x > 0.0) ? 1.0 : 0.0; });
-  auto error =
-      (loss_obj.loss_grad(logits, target_label)).hadamard_product(logits_deriv);
+
+  auto grad = loss_obj.loss_grad(logits, target_label);
+
+  // auto error =
+  //     (loss_obj.loss_grad(logits,
+  //     target_label)).hadamard_product(logits_deriv);
 
   for (int32_t layer_idx = this->layers.size() - 1; layer_idx >= 0;
        --layer_idx) {
-    error = this->layers[layer_idx]->backward(activations[layer_idx], error,
-                                              learning_rate);
+    grad = this->layers[layer_idx]->backward(activations[layer_idx], grad,
+                                             learning_rate);
   }
   const auto loss = loss_obj.loss(logits, target_label);
   const auto avg_loss = loss.reduce_mean();

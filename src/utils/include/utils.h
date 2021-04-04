@@ -55,6 +55,7 @@ public:
   Mat2D<T> elementwise_operation(std::function<T(T)> modifier);
   T reduce_sum() const;
   Mat2D<T> reduce_sum_axis(const size_t axis) const;
+  Mat2D<T> reduce_max_axis(const size_t axis) const;
   T reduce_mean() const;
   Mat2D<T> reduce_mean_axis(const size_t axis) const;
   Mat2D<size_t> argmax(const size_t axis) const;
@@ -163,8 +164,11 @@ T Mat2D<T>::operator()(size_t row_idx, size_t col_idx) const {
 }
 template <class T>
 Mat2D<T> Mat2D<T>::elementwise_operation(std::function<T(T)> modifier) {
-  std::for_each(std::begin(this->matrix_data), std::end(this->matrix_data),
-                [&](T x) { return modifier(x); });
+  std::vector<T> result;
+  result.resize(this->matrix_data.size());
+  std::transform(std::begin(this->matrix_data), std::end(this->matrix_data),
+                 std::begin(result), [&](T x) { return modifier(x); });
+  this->matrix_data = result;
   return *this;
 }
 
@@ -192,6 +196,26 @@ template <class T> Mat2D<T> Mat2D<T>::add(const Mat2D<T> &other) const {
 
 template <class T> T Mat2D<T>::reduce_sum() const {
   return std::accumulate(matrix_data.begin(), matrix_data.end(), T());
+}
+
+template <class T> Mat2D<T> Mat2D<T>::reduce_max_axis(const size_t axis) const {
+  const auto argmax_indices = this->argmax(axis);
+  const auto num_result_rows = argmax_indices.get_num_rows();
+  const auto num_result_cols = argmax_indices.get_num_cols();
+
+  Mat2D<T> max_vals(num_result_rows, num_result_cols);
+  if (axis == 0) {
+    for (size_t i = 0; i < max_vals.num_cols; ++i) {
+      max_vals(0, i) = this->operator()(argmax_indices(0, i), i);
+    }
+  } else if (axis == 1) {
+    for (size_t i = 0; i < max_vals.num_rows; ++i) {
+      max_vals(i, 0) = this->operator()(i, argmax_indices(i, 0));
+    }
+  } else {
+    throw std::runtime_error("Wrong axis for reduce_max, needs to be 0 or 1");
+  }
+  return max_vals;
 }
 
 template <class T> Mat2D<size_t> Mat2D<T>::argmax(const size_t axis) const {

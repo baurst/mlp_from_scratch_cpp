@@ -27,13 +27,13 @@ Mat2D<float> DenseLayer::backward(const Mat2D<float> &input,
                                   const Mat2D<float> &learning_rate) {
   const auto grad_input =
       gradients_output.dot_product(this->weights.transpose());
-
   const auto grad_weights = input.transpose().dot_product(gradients_output);
   const auto grad_biases = gradients_output.reduce_mean_axis(0);
-  this->weights =
-      this->weights.minus(learning_rate.hadamard_product(grad_weights));
-  this->biases =
-      this->biases.minus(learning_rate.hadamard_product(grad_biases));
+
+  const auto weight_update = learning_rate.hadamard_product(grad_weights);
+  const auto bias_update = learning_rate.hadamard_product(grad_biases);
+  this->weights = this->weights.minus(weight_update);
+  this->biases = this->biases.minus(bias_update);
 
   return grad_input;
 }
@@ -77,37 +77,52 @@ Mat2D<float> MSELoss::loss(const Mat2D<float> &predictions,
 Mat2D<float> MSELoss::loss_grad(const Mat2D<float> &predictions,
                                 const Mat2D<float> &labels) const {
   // partial derivative of Loss for the predictions
-  Mat2D<float> divisor(1, 1,
-                       {1.0f / static_cast<float>(predictions.get_num_rows())});
-  return predictions.minus(labels).hadamard_product(divisor);
+  return predictions.minus(labels);
 }
 
-CELoss::~CELoss(){};
+SoftmaxCrossEntropyWithLogitsLoss::~SoftmaxCrossEntropyWithLogitsLoss(){};
 
-CELoss::CELoss(){};
+SoftmaxCrossEntropyWithLogitsLoss::SoftmaxCrossEntropyWithLogitsLoss(){};
 
-Mat2D<float> CELoss::loss(const Mat2D<float> &predictions,
-                          const Mat2D<float> &labels) const {
-  auto pred_loc = predictions;
+Mat2D<float> softmax(const Mat2D<float> &logits) {
+  auto logits_tmp = logits;
+  std::cout << "Logits:" << std::endl << logits_tmp << std::endl;
+
+  const auto logits_max = logits_tmp.reduce_max_axis(1);
+
+  logits_tmp = logits_tmp.minus(logits_max);
+
   const auto logits_exp =
-      pred_loc.elementwise_operation([](float x) { return std::exp(x); });
+      logits_tmp.elementwise_operation([](float x) { return std::exp(x); });
+  std::cout << "logits_exp:" << std::endl << logits_exp << std::endl;
+
   auto logits_exp_sum = logits_exp.reduce_sum_axis(1);
-  const auto log =
-      logits_exp_sum.elementwise_operation([](float x) { return std::log(x); });
-  const auto ce = -labels.add(log);
-  return labels;
+  auto probs = logits_exp.divide_by(logits_exp_sum);
+  std::cout << "Probs:" << std::endl << probs << std::endl;
+
+  return probs;
+}
+Mat2D<float>
+SoftmaxCrossEntropyWithLogitsLoss::loss(const Mat2D<float> &predictions,
+                                        const Mat2D<float> &labels) const {
+  auto pred_probs = softmax(predictions);
+  // std::cout << pred_probs << std::endl;
+  // std::cout << pred_probs.reduce_sum_axis(1) << std::endl;
+
+  const auto log_probs =
+      pred_probs.elementwise_operation([](float x) { return std::log(x); });
+
+  std::cout << log_probs << std::endl;
+  const auto ce = -(labels.hadamard_product(log_probs).reduce_sum_axis(1));
+  return ce;
 }
 
-Mat2D<float> CELoss::loss_grad(const Mat2D<float> &predictions,
-                               const Mat2D<float> &labels) const {
-  // partial derivative of Loss for the predictions
-  auto pred_loc = predictions;
-
-  const Mat2D<float> divisor(
-      1, 1, {1.0f / static_cast<float>(predictions.get_num_rows())});
-  const auto logits_exp =
-      pred_loc.elementwise_operation([](float x) { return std::exp(x); });
-  const auto logits_sum = logits_exp.reduce_sum_axis(1);
-  const auto softmax = logits_exp.divide_by(logits_sum);
-  return -labels.add(softmax).hadamard_product(divisor);
+Mat2D<float>
+SoftmaxCrossEntropyWithLogitsLoss::loss_grad(const Mat2D<float> &predictions,
+                                             const Mat2D<float> &labels) const {
+  // const auto ce = -labels.add(log);
+  // average gradient over minibatch
+  auto pred_tmp = predictions;
+  const auto pred_probs = softmax(pred_tmp);
+  return pred_probs.minus(labels);
 }

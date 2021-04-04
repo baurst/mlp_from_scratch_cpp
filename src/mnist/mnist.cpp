@@ -7,13 +7,15 @@
 #include <tuple>
 #include <vector>
 std::vector<std::pair<Mat2D<float>, Mat2D<float>>>
-read_mnist_csv(const std::string csv_filename, const size_t batch_size) {
+read_mnist_csv(const std::string csv_filename, const size_t batch_size,
+               const int64_t num_batches_to_load) {
   std::cout << "Loading MNIST dataset from " << csv_filename << std::endl;
   std::vector<std::pair<Mat2D<float>, Mat2D<float>>> dataset;
   std::ifstream ds_file(csv_filename);
   std::string line;
   const size_t img_offset = 784;
   size_t batch_idx = 0;
+  size_t num_batches_loaded = 0;
   Mat2D<float> labels_one_hot(batch_size, 10, Initializer::ZEROS);
   Mat2D<float> flat_images(batch_size, 784, Initializer::ZEROS);
   while (std::getline(ds_file, line)) {
@@ -42,6 +44,11 @@ read_mnist_csv(const std::string csv_filename, const size_t batch_size) {
     if (batch_idx == batch_size) {
       dataset.push_back(std::make_pair(flat_images, labels_one_hot));
       batch_idx = 0;
+      num_batches_loaded++;
+      if (num_batches_to_load > 0 &&
+          static_cast<int64_t>(num_batches_loaded) == num_batches_to_load) {
+        break;
+      }
     }
   }
   std::cout << "Loaded " << dataset.size() << " batches of " << batch_size
