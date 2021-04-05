@@ -6,3 +6,4 @@ if(NOT "${CMAKE_CXX_STANDARD}")
 endif()
 
 add_subdirectory(src)
+add_subdirectory(test)
