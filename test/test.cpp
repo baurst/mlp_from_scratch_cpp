@@ -1,4 +1,5 @@
 #define CATCH_CONFIG_MAIN
+#include "layer.h"
 #include "utils.h"
 #include <catch2/catch.hpp>
 
@@ -16,6 +17,9 @@ TEST_CASE("Mat2D Tests hadamard_product", "hadamard_product") {
   const auto B_exp =
       Mat2D<float>(2, 5, {0., 1., 4., 9., 16., 25., 36., 49., 64., 81.});
   REQUIRE_THAT(B.matrix_data, Catch::Approx(B_exp.matrix_data).epsilon(1.e-5));
+
+  REQUIRE_THAT(B.hadamard_product(A).matrix_data,
+               Catch::Approx(A.hadamard_product(B).matrix_data).epsilon(1.e-5));
 }
 
 TEST_CASE("Mat2D Tests dot_product", "dot_product") {
@@ -206,4 +210,58 @@ TEST_CASE("Elementwise Division", "Elementwise Division") {
           some_mat_div_10_exp.get_num_cols());
   REQUIRE_THAT(some_mat_div_10_test.matrix_data,
                Catch::Approx(some_mat_div_10_exp.matrix_data).epsilon(1.e-5));
+}
+
+TEST_CASE("Softmax", "Softmax") {
+  const auto mat = Mat2D<float>(
+      3, 4, {1.f, 0.f, 2.f, -1.f, 2.f, 4.f, 6.f, 8.f, 3.f, 2.f, 1.f, 0.f});
+
+  const auto softmax_exp = Mat2D<float>(3, 4,
+                                        {
+                                            0.23688282,
+                                            0.08714432,
+                                            0.64391426,
+                                            0.0320586,
+                                            0.00214401,
+                                            0.0158422,
+                                            0.11705891,
+                                            0.86495488,
+                                            0.64391426,
+                                            0.23688282,
+                                            0.08714432,
+                                            0.0320586,
+                                        });
+
+  const auto softmax_test = softmax(mat);
+
+  REQUIRE(softmax_test.get_num_rows() == softmax_exp.get_num_rows());
+  REQUIRE(softmax_test.get_num_cols() == softmax_exp.get_num_cols());
+  REQUIRE_THAT(softmax_test.matrix_data,
+               Catch::Approx(softmax_exp.matrix_data).epsilon(1.e-5));
+}
+
+TEST_CASE("SoftmaxCEWithLogits", "SoftmaxCEWithLogits") {
+  const auto predictions = Mat2D<float>(
+      5, 10,
+      {9.12342578, 0.63358697, 8.06560308, 3.9013097,  2.62197487, 6.23334865,
+       6.41026575, 2.81146893, 7.77734698, 4.55262309, 9.60435717, 7.04164476,
+       0.23223837, 0.46014417, 2.03215742, 5.46875653, 9.3033918,  7.62148293,
+       8.93237563, 8.01205415, 3.71256154, 7.27356444, 3.56967595, 3.91320274,
+       5.17653227, 2.23887074, 7.590534,   2.15816133, 6.53402656, 8.40739104,
+       7.24587216, 6.99176605, 0.6429947,  5.22698447, 8.62558009, 9.86430273,
+       4.34014201, 5.79361825, 4.93217826, 7.08567487, 3.46292678, 3.58536139,
+       9.04794016, 8.42519859, 3.06082975, 8.43025028, 6.01086521, 6.6900385,
+       7.73285345, 3.04084278});
+
+  const auto labels_one_hot = Mat2D<float>(
+      5, 10,
+      {
+          1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.,
+          0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1.,
+          0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.,
+      });
+  const auto ce_layer = SoftmaxCrossEntropyWithLogitsLoss();
+  const auto ce_batched = ce_layer.loss(predictions, labels_one_hot);
+  const auto ce = ce_batched.reduce_mean();
+  REQUIRE(ce == 4.318751335144043);
 }

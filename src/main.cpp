@@ -70,14 +70,14 @@ int main(int argc, char *argv[]) {
     std::cout << "Using mnist csv root dir " << mnist_train_ds_path
               << std::endl;
   }
-  std::vector<size_t> layer_sizes = {100, 40};
+  std::vector<size_t> layer_sizes = {25, 25};
 
   auto mlp = MLP(layer_sizes, 784, 10);
 
   const size_t num_train_epochs = 100000;
-  const size_t batch_size = 16;
+  const size_t batch_size = 1;
   // const size_t batch_size = 64;
-  const auto num_train_batches = 1;
+  const auto num_train_batches = -1;
   // const auto num_train_batches = 5;
   const auto mse_loss_obj = SoftmaxCrossEntropyWithLogitsLoss();
   const auto train_ds =
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
   const size_t online_val_every_n_steps = 100;
   const size_t num_online_val_on_train_steps = 2;
   const size_t log_loss_every_n_steps = 10;
-  const auto learning_rate = Mat2D<float>(1, 1, {0.01});
+  const auto learning_rate = Mat2D<float>(1, 1, {0.0001});
 
   auto rng = std::default_random_engine{};
 

@@ -89,3 +89,5 @@ public:
 
 private:
 };
+
+Mat2D<float> softmax(const Mat2D<float> &logits);

@@ -53,5 +53,7 @@ read_mnist_csv(const std::string csv_filename, const size_t batch_size,
   }
   std::cout << "Loaded " << dataset.size() << " batches of " << batch_size
             << " samples. Dropped remainder: " << batch_idx << std::endl;
+
+  std::random_shuffle(dataset.begin(), dataset.end());
   return dataset;
 }

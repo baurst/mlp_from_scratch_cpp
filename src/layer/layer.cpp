@@ -61,7 +61,7 @@ Mat2D<float> RELUActivationLayer::backward(const Mat2D<float> &input,
   Mat2D<float> result = tmp_in.elementwise_operation(
       // [](float x) { return (x > 0.0) ? 1.0 : 0.0; });
       [](float x) { return (x > 0.0) ? 1.0 : 0.1; });
-  return result.hadamard_product(gradient_output);
+  return gradient_output.hadamard_product(input);
 }
 
 Loss::~Loss(){};
@@ -90,21 +90,19 @@ SoftmaxCrossEntropyWithLogitsLoss::~SoftmaxCrossEntropyWithLogitsLoss(){};
 SoftmaxCrossEntropyWithLogitsLoss::SoftmaxCrossEntropyWithLogitsLoss(){};
 
 Mat2D<float> softmax(const Mat2D<float> &logits) {
-  auto logits_tmp = logits;
-  // std::cout << "Logits:" << std::endl << logits_tmp << std::endl;
+  const auto logits_max = logits.reduce_max_axis(1);
+  auto stable_logits = logits;
+  // std::cout << "Logits:" << std::endl << stable_logits << std::endl;
 
-  const auto logits_max = logits_tmp.reduce_max_axis(1);
-
-  logits_tmp = logits_tmp.minus(logits_max);
+  stable_logits = stable_logits.minus(logits_max);
 
   const auto logits_exp =
-      logits_tmp.elementwise_operation([](float x) { return std::exp(x); });
+      stable_logits.elementwise_operation([](float x) { return std::exp(x); });
   // std::cout << "logits_exp:" << std::endl << logits_exp << std::endl;
 
   auto logits_exp_sum = logits_exp.reduce_sum_axis(1);
   auto probs = logits_exp.divide_by(logits_exp_sum);
   // std::cout << "Probs:" << std::endl << probs << std::endl;
-
   return probs;
 }
 Mat2D<float>
@@ -119,17 +117,21 @@ SoftmaxCrossEntropyWithLogitsLoss::loss(const Mat2D<float> &predictions,
 
   // std::cout << log_probs << std::endl;
   const auto ce = -(labels.hadamard_product(log_probs).reduce_sum_axis(1));
+
+  // const auto avg_loss = ce.reduce_mean();
+  // if (avg_loss > 5.0) {
+  //   std::cout << "about to crash!" << std::endl;
+  // }
+
   return ce;
 }
 
-Mat2D<float>
-SoftmaxCrossEntropyWithLogitsLoss::loss_grad(const Mat2D<float> &predictions,
-                                             const Mat2D<float> &labels) const {
-  // const auto ce = -labels.add(log);
+Mat2D<float> SoftmaxCrossEntropyWithLogitsLoss::loss_grad(
+    const Mat2D<float> &predictions, const Mat2D<float> &labels_one_hot) const {
+  // const auto ce = -labels_one_hot.add(log);
   // average gradient over minibatch
   auto pred_tmp = predictions;
   const auto pred_probs = softmax(pred_tmp);
-  const auto mean_grad = pred_probs.minus(labels); //.reduce_mean_axis(0);
-
-  return mean_grad;
+  const auto grad = pred_probs.minus(labels_one_hot);
+  return grad;
 }
