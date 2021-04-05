@@ -74,6 +74,15 @@ float MLP::train(const Mat2D<float> &input, const Mat2D<float> &target_label,
   const auto avg_loss = loss.reduce_mean();
 
   if (std::isnan(avg_loss)) {
+    size_t layer_idx = 0;
+    for (size_t layer_idx = 0; layer_idx < this->layers.size(); ++layer_idx) {
+      std::cout << layer_idx << " Layer Idx activation" << std::endl;
+      std::cout << activations[layer_idx] << std::endl;
+      std::cout << layer_idx << " Layer VARS" << std::endl;
+      this->layers[layer_idx]->print_trainable_variables();
+
+      layer_idx++;
+    }
     std::cout.flush();
     throw std::runtime_error("Encountered NAN in loss!");
   }

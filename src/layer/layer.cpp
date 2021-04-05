@@ -37,8 +37,18 @@ Mat2D<float> DenseLayer::backward(const Mat2D<float> &input,
   this->weights = this->weights.minus(weight_update);
   this->biases = this->biases.minus(bias_update);
 
-  return grad_input.divide_by(
-      Mat2D<float>(1, 1, {static_cast<float>(input.get_num_rows())}));
+  return grad_input;
+  // .divide_by(
+  // Mat2D<float>(1, 1, {static_cast<float>(input.get_num_rows())}));
+}
+
+void DenseLayer::print_trainable_variables() const {
+  std::cout << "Weight: " << this->weights.get_num_rows() << "x"
+            << this->weights.get_num_cols() << std::endl;
+  std::cout << this->weights << std::endl;
+  std::cout << "Bias: " << this->biases.get_num_rows() << "x"
+            << this->biases.get_num_cols() << std::endl;
+  std::cout << this->biases << std::endl;
 }
 
 RELUActivationLayer::~RELUActivationLayer(){};
@@ -60,8 +70,9 @@ Mat2D<float> RELUActivationLayer::backward(const Mat2D<float> &input,
   Mat2D<float> result = tmp_in.elementwise_operation(
       // [](float x) { return (x > 0.0) ? 1.0 : 0.0; });
       [](float x) { return (x > 0.0) ? 1.0 : 0.1; });
-  return gradient_output.hadamard_product(input);
+  return gradient_output.hadamard_product(result);
 }
+void RELUActivationLayer::print_trainable_variables() const {}
 
 Loss::~Loss(){};
 

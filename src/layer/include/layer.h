@@ -9,6 +9,7 @@ public:
   virtual Mat2D<float> backward(const Mat2D<float> &input,
                                 const Mat2D<float> &gradients_output,
                                 const Mat2D<float> &learning_rate) = 0;
+  virtual void print_trainable_variables() const = 0;
   Layer();
   virtual ~Layer() = 0;
 
@@ -24,6 +25,7 @@ public:
   Mat2D<float> backward(const Mat2D<float> &input,
                         const Mat2D<float> &gradients_output,
                         const Mat2D<float> &learning_rate) override;
+  void print_trainable_variables() const override;
 
 private:
   Mat2D<float> weights;
@@ -38,6 +40,7 @@ public:
   Mat2D<float> backward(const Mat2D<float> &input,
                         const Mat2D<float> &gradients_output,
                         const Mat2D<float> &learning_rate) override;
+  void print_trainable_variables() const override;
 
 private:
 };
@@ -50,6 +53,7 @@ public:
   Mat2D<float> backward(const Mat2D<float> &input,
                         const Mat2D<float> &gradients_output,
                         const Mat2D<float> &learning_rate) override;
+  void print_trainable_variables() const override;
 
 private:
 };
