@@ -27,19 +27,18 @@ Mat2D<float> DenseLayer::backward(const Mat2D<float> &input,
                                   const Mat2D<float> &learning_rate) {
   const auto grad_input =
       gradients_output.dot_product(this->weights.transpose());
-  const auto grad_weights =
-      input.transpose()
-          .dot_product(gradients_output)
-          .divide_by(Mat2D<float>(
-              1, 1, {static_cast<float>(gradients_output.get_num_rows())}));
-  const auto grad_biases = gradients_output.reduce_mean_axis(0);
+  const auto grad_weights = input.transpose().dot_product(gradients_output);
+  // .divide_by(Mat2D<float>(
+  //     1, 1, {static_cast<float>(gradients_output.get_num_rows())}));
+  const auto grad_biases = gradients_output.reduce_sum_axis(0);
 
   const auto weight_update = learning_rate.hadamard_product(grad_weights);
   const auto bias_update = learning_rate.hadamard_product(grad_biases);
   this->weights = this->weights.minus(weight_update);
   this->biases = this->biases.minus(bias_update);
 
-  return grad_input;
+  return grad_input.divide_by(
+      Mat2D<float>(1, 1, {static_cast<float>(input.get_num_rows())}));
 }
 
 RELUActivationLayer::~RELUActivationLayer(){};
@@ -132,6 +131,9 @@ Mat2D<float> SoftmaxCrossEntropyWithLogitsLoss::loss_grad(
   // average gradient over minibatch
   auto pred_tmp = predictions;
   const auto pred_probs = softmax(pred_tmp);
-  const auto grad = pred_probs.minus(labels_one_hot);
+  const auto grad =
+      pred_probs.minus(labels_one_hot)
+          .divide_by(Mat2D<float>(
+              1, 1, {static_cast<float>(predictions.get_num_rows())}));
   return grad;
 }
