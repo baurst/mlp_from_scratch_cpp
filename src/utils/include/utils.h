@@ -104,6 +104,7 @@ Mat2D<T>::Mat2D(const size_t num_rows, const size_t num_cols,
   matrix_data.resize(num_rows * num_cols);
   matrix_data = data;
 }
+
 /*
 template <class T>
 Mat2D<T>::Mat2D(const Mat2D<T> &other)
