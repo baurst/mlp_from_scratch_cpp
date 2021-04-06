@@ -314,3 +314,40 @@ TEST_CASE("SoftmaxCEWithLogitsGradient", "SoftmaxCEWithLogitsGradient") {
   REQUIRE_THAT(grad_test.matrix_data,
                Catch::Approx(dL_dz.matrix_data).epsilon(1.e-5));
 }
+
+TEST_CASE("LeakyReluGradient", "LeakyReluGradient") {
+
+  RELUActivationLayer lrelu(0.1f);
+  const auto activations = Mat2D<float>(
+      5, 10, {3.06193989,  2.03888584,  -3.99773113, 4.19482614,  2.142413,
+              4.98847007,  -3.50551695, 3.68126057,  -3.37507065, 1.15559564,
+              -3.76180017, 3.48008229,  3.07318959,  0.69100739,  -0.92816703,
+              -4.30833005, 1.97428773,  -0.46457317, 2.22055599,  3.66382326,
+              4.75521505,  3.55803342,  -4.88285916, -1.40021936, 2.29990562,
+              -3.28370323, 0.21036606,  -4.45662012, -3.00003475, -4.81478206,
+              2.93697703,  -2.76075312, -1.54648319, 4.28081293,  2.04414402,
+              -4.6816107,  -3.35305844, 1.21478401,  0.77228589,  -2.62107179,
+              4.34213998,  1.13965956,  0.35632803,  0.89909976,  2.3012203,
+              -1.88055005, -1.01778938, -2.90156251, -3.13806994, 4.4437239});
+  const auto gradients_exp = Mat2D<float>(
+      5, 10, {1.,  1.,  0.1, 1.,  1.,  1.,  0.1, 1.,  0.1, 1.,  0.1, 1., 1.,
+              1.,  0.1, 0.1, 1.,  0.1, 1.,  1.,  1.,  1.,  0.1, 0.1, 1., 0.1,
+              1.,  0.1, 0.1, 0.1, 1.,  0.1, 0.1, 1.,  1.,  0.1, 0.1, 1., 1.,
+              0.1, 1.,  1.,  1.,  1.,  1.,  0.1, 0.1, 0.1, 0.1, 1.});
+  std::vector<float> ones(5 * 10, 1.0);
+  const auto grads_at_output = Mat2D<float>(5, 10, ones);
+
+  const auto grads_actual =
+      lrelu.backward(activations, grads_at_output, Mat2D<float>(1, 1, {0.0f}));
+
+  REQUIRE_THAT(grads_actual.matrix_data,
+               Catch::Approx(gradients_exp.matrix_data).epsilon(1.e-5));
+}
+
+TEST_CASE("BiasInit", "BiasInit") {
+
+  DenseLayer layer(10, 5);
+  std::vector<float> zeros(5, 0.0);
+
+  REQUIRE_THAT(layer.biases.matrix_data, Catch::Approx(zeros).epsilon(1.e-5));
+}

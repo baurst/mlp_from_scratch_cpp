@@ -19,7 +19,8 @@ private:
 class DenseLayer : public Layer {
 public:
   DenseLayer(size_t number_of_inputs, size_t number_of_neurons,
-             Initializer init = RANDOM_UNIFORM);
+             Initializer weight_init = RANDOM_UNIFORM,
+             Initializer bias_init = ZEROS);
   ~DenseLayer() override;
   Mat2D<float> forward(const Mat2D<float> &input) const override;
   Mat2D<float> backward(const Mat2D<float> &input,
@@ -27,15 +28,30 @@ public:
                         const Mat2D<float> &learning_rate) override;
   void print_trainable_variables() const override;
 
-private:
   Mat2D<float> weights;
   Mat2D<float> biases;
+
+private:
 };
 
 class RELUActivationLayer : public Layer {
 public:
-  RELUActivationLayer();
+  RELUActivationLayer(const float alpha);
   ~RELUActivationLayer() override;
+  Mat2D<float> forward(const Mat2D<float> &input) const override;
+  Mat2D<float> backward(const Mat2D<float> &input,
+                        const Mat2D<float> &gradients_output,
+                        const Mat2D<float> &learning_rate) override;
+  void print_trainable_variables() const override;
+  float alpha = 0.0;
+
+private:
+};
+
+class SigmoidActivationLayer : public Layer {
+public:
+  SigmoidActivationLayer();
+  ~SigmoidActivationLayer() override;
   Mat2D<float> forward(const Mat2D<float> &input) const override;
   Mat2D<float> backward(const Mat2D<float> &input,
                         const Mat2D<float> &gradients_output,

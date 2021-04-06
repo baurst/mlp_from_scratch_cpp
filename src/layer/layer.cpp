@@ -7,9 +7,9 @@ Layer::Layer(){};
 Layer::~Layer(){};
 
 DenseLayer::DenseLayer(size_t number_of_inputs, size_t number_of_neurons,
-                       Initializer init)
-    : weights(number_of_inputs, number_of_neurons, init),
-      biases(1, number_of_neurons, init) {
+                       Initializer weight_init, Initializer bias_init)
+    : weights(number_of_inputs, number_of_neurons, weight_init),
+      biases(1, number_of_neurons, bias_init) {
   // std::cout << "DenseLayer: Inputs " << number_of_inputs << " Neurons "
   //<< number_of_neurons << std::endl;
 }
@@ -53,13 +53,13 @@ void DenseLayer::print_trainable_variables() const {
 
 RELUActivationLayer::~RELUActivationLayer(){};
 
-RELUActivationLayer::RELUActivationLayer(){};
+RELUActivationLayer::RELUActivationLayer(const float alpha) : alpha(alpha){};
 
 Mat2D<float> RELUActivationLayer::forward(const Mat2D<float> &input) const {
   auto tmp_in = input;
   Mat2D<float> result = tmp_in.elementwise_operation(
       // [](float x) { return std::max(0.0f, x); });
-      [](float x) { return std::max(0.1f * x, x); });
+      [this](float x) { return std::max(this->alpha * x, x); });
 
   return result;
 }
@@ -69,10 +69,32 @@ Mat2D<float> RELUActivationLayer::backward(const Mat2D<float> &input,
   auto tmp_in = input;
   Mat2D<float> gradient = tmp_in.elementwise_operation(
       // [](float x) { return (x > 0.0) ? 1.0 : 0.0; });
-      [](float x) { return (x > 0.0) ? 1.0 : 0.1; });
+      [this](float x) { return (x > 0.0) ? 1.0 : this->alpha; });
   return gradient_output.hadamard_product(gradient);
 }
 void RELUActivationLayer::print_trainable_variables() const {}
+
+SigmoidActivationLayer::~SigmoidActivationLayer(){};
+
+SigmoidActivationLayer::SigmoidActivationLayer(){};
+
+Mat2D<float> SigmoidActivationLayer::forward(const Mat2D<float> &input) const {
+  auto tmp_in = input;
+  Mat2D<float> result = tmp_in.elementwise_operation(
+      // [](float x) { return std::max(0.0f, x); });
+      [](float x) { return 1.0 / (1 + std::exp(-x)); });
+
+  return result;
+}
+Mat2D<float>
+SigmoidActivationLayer::backward(const Mat2D<float> &input,
+                                 const Mat2D<float> &gradient_output,
+                                 const Mat2D<float> &learning_rate) {
+  const auto gradient =
+      input.hadamard_product(Mat2D<float>(1, 1, {1.0}).minus(input));
+  return gradient_output.hadamard_product(gradient);
+}
+void SigmoidActivationLayer::print_trainable_variables() const {}
 
 Loss::~Loss(){};
 

@@ -17,9 +17,13 @@ MLP::MLP(const std::vector<size_t> layer_sizes, const size_t number_of_inputs,
     std::cout << "Created DenseLayer with layer_idx " << layer_idx << std::endl;
     layer_idx++;
     input_size = layer_size;
-    layers.push_back(std::make_unique<RELUActivationLayer>());
+    layers.push_back(std::make_unique<RELUActivationLayer>(0.1));
     std::cout << "Created RELUActivationLayer with layer_idx " << layer_idx
               << std::endl;
+    //  layers.push_back(std::make_unique<SigmoidActivationLayer>());
+    // std::cout << "Created SigmoidActivationLayer with layer_idx " <<
+    // layer_idx
+    //           << std::endl;
     layer_idx++;
   }
   layers.push_back(std::make_unique<DenseLayer>(input_size, number_of_targets));

@@ -16,8 +16,8 @@ read_mnist_csv(const std::string csv_filename, const size_t batch_size,
   const size_t img_offset = 784;
   size_t batch_idx = 0;
   size_t num_batches_loaded = 0;
-  Mat2D<float> labels_one_hot(batch_size, 10, Initializer::ZEROS);
   Mat2D<float> flat_images(batch_size, 784, Initializer::ZEROS);
+  Mat2D<float> labels_one_hot(batch_size, 10, Initializer::ZEROS);
   while (std::getline(ds_file, line)) {
     std::vector<std::string> line_split;
     std::stringstream ss(line);
@@ -43,6 +43,8 @@ read_mnist_csv(const std::string csv_filename, const size_t batch_size,
     ++batch_idx;
     if (batch_idx == batch_size) {
       dataset.push_back(std::make_pair(flat_images, labels_one_hot));
+      flat_images = Mat2D<float>(batch_size, 784, Initializer::ZEROS);
+      labels_one_hot = Mat2D<float>(batch_size, 10, Initializer::ZEROS);
       batch_idx = 0;
       num_batches_loaded++;
       if (num_batches_to_load > 0 &&
