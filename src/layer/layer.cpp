@@ -67,10 +67,10 @@ Mat2D<float> RELUActivationLayer::backward(const Mat2D<float> &input,
                                            const Mat2D<float> &gradient_output,
                                            const Mat2D<float> &learning_rate) {
   auto tmp_in = input;
-  Mat2D<float> result = tmp_in.elementwise_operation(
+  Mat2D<float> gradient = tmp_in.elementwise_operation(
       // [](float x) { return (x > 0.0) ? 1.0 : 0.0; });
       [](float x) { return (x > 0.0) ? 1.0 : 0.1; });
-  return gradient_output.hadamard_product(result);
+  return gradient_output.hadamard_product(gradient);
 }
 void RELUActivationLayer::print_trainable_variables() const {}
 
