@@ -53,21 +53,19 @@ void log_metric(const float metric, std::string metric_description,
 }
 
 int main(int argc, char *argv[]) {
-  std::string mnist_train_ds_path =
-      "/lhome/baurst/priv_projects/cpp_mlp/data/mnist_train.csv";
-  std::string mnist_test_ds_path =
-      "/lhome/baurst/priv_projects/cpp_mlp/data/mnist_test.csv";
-  if (argc == 1) {
-    std::cout << "No path passed to dataset, using default path"
-              << mnist_train_ds_path << std::endl;
-    std::cout
-        << "Pass path to mnist csv root dir as argument if you wish to use "
-           "another location."
-        << std::endl;
-
-  } else if (argc == 2) {
+  std::string mnist_train_ds_path = "";
+  std::string mnist_test_ds_path = "";
+  if (argc != 3) {
+    std::cout << "No paths to dataset given!" << std::endl;
+    std::cout << "Usage:" << std::endl
+              << "./main path/to/tain.csv path/to/test.csv" << std::endl;
+    return 1;
+  } else {
     mnist_train_ds_path = static_cast<std::string>(argv[1]);
-    std::cout << "Using mnist csv root dir " << mnist_train_ds_path
+    std::cout << "Using mnist csv train dataset " << mnist_train_ds_path
+              << std::endl;
+    mnist_test_ds_path = static_cast<std::string>(argv[1]);
+    std::cout << "Using mnist csv test dataset " << mnist_test_ds_path
               << std::endl;
   }
   std::vector<size_t> layer_sizes = {50, 25};

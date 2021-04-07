@@ -9,7 +9,10 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/src/main",
-            "args": [],
+            "args": [
+                "/lhome/baurst/priv_projects/cpp_mlp/data/mnist_train.csv",
+                "/lhome/baurst/priv_projects/cpp_mlp/data/mnist_test.csv"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
