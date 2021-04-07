@@ -34,10 +34,10 @@ public:
 private:
 };
 
-class RELUActivationLayer : public Layer {
+class LeakyRELUActivationLayer : public Layer {
 public:
-  RELUActivationLayer(const float alpha);
-  ~RELUActivationLayer() override;
+  LeakyRELUActivationLayer(const float alpha);
+  ~LeakyRELUActivationLayer() override;
   Mat2D<float> forward(const Mat2D<float> &input) const override;
   Mat2D<float> backward(const Mat2D<float> &input,
                         const Mat2D<float> &gradients_output,

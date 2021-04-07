@@ -31,7 +31,7 @@ template <typename T> T dot(const std::vector<T> x, const std::vector<T> y) {
   }
   const T dp = std::inner_product(x.begin(), x.end(), y.begin(), 0);
   return dp;
-};
+}
 
 enum Initializer { ZEROS, RANDOM_UNIFORM };
 

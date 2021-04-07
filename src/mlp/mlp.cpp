@@ -8,26 +8,26 @@
 #include <vector>
 
 MLP::MLP(const std::vector<size_t> layer_sizes, const size_t number_of_inputs,
-         const size_t number_of_targets, const Initializer init) {
+         const size_t number_of_targets, const Initializer weight_init,
+         const Initializer bias_init) {
   size_t input_size = number_of_inputs;
   size_t layer_idx = 0;
   for (const size_t layer_size : layer_sizes) {
-    layers.push_back(
-        std::make_unique<DenseLayer>(input_size, layer_size, init));
-    std::cout << "Created DenseLayer with layer_idx " << layer_idx << std::endl;
+    std::cout << "Layer " << layer_idx << ": ";
+    layers.push_back(std::make_unique<DenseLayer>(input_size, layer_size,
+                                                  weight_init, bias_init));
+    input_size = layer_size; // for the next layer
     layer_idx++;
-    input_size = layer_size;
-    layers.push_back(std::make_unique<RELUActivationLayer>(0.1));
-    std::cout << "Created RELUActivationLayer with layer_idx " << layer_idx
-              << std::endl;
-    //  layers.push_back(std::make_unique<SigmoidActivationLayer>());
+    std::cout << "Layer " << layer_idx << ": ";
+    layers.push_back(std::make_unique<LeakyRELUActivationLayer>(0.1));
+    // layers.push_back(std::make_unique<SigmoidActivationLayer>());
     // std::cout << "Created SigmoidActivationLayer with layer_idx " <<
     // layer_idx
     //           << std::endl;
-    layer_idx++;
+    // layer_idx++;
   }
+  std::cout << "Layer " << layer_idx << ": ";
   layers.push_back(std::make_unique<DenseLayer>(input_size, number_of_targets));
-  std::cout << "Created DenseLayer with layer_idx " << layer_idx << std::endl;
   layer_idx++;
 }
 
@@ -38,12 +38,6 @@ std::vector<Mat2D<float>> MLP::forward(const Mat2D<float> &input) const {
   size_t layer_idx = 0;
   for (const auto &layer : layers) {
     const auto tmp_out = layer->forward(activations.back());
-    // std::cout << "Layer " << layer_idx
-    //           << " input shape: " << activations.back().get_num_rows() << ",
-    //           "
-    //           << activations.back().get_num_cols()
-    //           << "--> output shape: " << tmp_out.get_num_rows() << ", "
-    //           << tmp_out.get_num_cols() << std::endl;
     activations.push_back(tmp_out);
 
     layer_idx++;
@@ -59,18 +53,14 @@ float MLP::train(const Mat2D<float> &input, const Mat2D<float> &target_label,
 
   auto grad = loss_obj.loss_grad(logits, target_label);
   if (std::isnan(grad.reduce_mean())) {
+    this->print_debug_information(activations);
     std::cout.flush();
-    throw std::runtime_error("Encountered NAN in Gradient, we are doomed!");
+    throw std::runtime_error("Encountered NAN in Gradient, we are doomed! "
+                             "Maybe try lowering the learning rate.");
   }
-  // auto error =
-  //     (loss_obj.loss_grad(logits,
-  //     target_label)).hadamard_product(logits_deriv);
-  // std::cout << "grad: " << std::endl << grad << std::endl;
 
   for (int32_t layer_idx = this->layers.size() - 1; layer_idx >= 0;
        --layer_idx) {
-    // std::cout << "Backprop Layer Idx " << layer_idx << std::endl;
-    // std::cout << "grad: " << layer_idx << std::endl << grad << std::endl;
     const auto layer_input = activations[layer_idx];
 
     grad = this->layers[layer_idx]->backward(layer_input, grad, learning_rate);
@@ -78,17 +68,10 @@ float MLP::train(const Mat2D<float> &input, const Mat2D<float> &target_label,
   const auto avg_loss = loss.reduce_mean();
 
   if (std::isnan(avg_loss)) {
-    size_t layer_idx = 0;
-    for (size_t layer_idx = 0; layer_idx < this->layers.size(); ++layer_idx) {
-      std::cout << layer_idx << " Layer Idx activation" << std::endl;
-      std::cout << activations[layer_idx] << std::endl;
-      std::cout << layer_idx << " Layer VARS" << std::endl;
-      this->layers[layer_idx]->print_trainable_variables();
-
-      layer_idx++;
-    }
+    this->print_debug_information(activations);
     std::cout.flush();
-    throw std::runtime_error("Encountered NAN in loss!");
+    throw std::runtime_error(
+        "Encountered NAN in loss! Maybe try lowering the learning rate.");
   }
   return avg_loss;
 }
@@ -98,4 +81,14 @@ Mat2D<size_t> MLP::predict(const Mat2D<float> &input) const {
   const auto logits = activations.back();
   const auto argmax_indices = logits.argmax(1);
   return argmax_indices;
+}
+
+void MLP::print_debug_information(
+    const std::vector<Mat2D<float>> &activations) const {
+  for (size_t layer_idx = 0; layer_idx < this->layers.size(); ++layer_idx) {
+    std::cout << "Layer: " << layer_idx << " activation:" << std::endl;
+    std::cout << activations[layer_idx] << std::endl;
+    std::cout << "Layer: " << layer_idx << " trainable variables:" << std::endl;
+    this->layers[layer_idx]->print_trainable_variables();
+  }
 }

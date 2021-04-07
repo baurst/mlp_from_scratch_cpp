@@ -317,7 +317,7 @@ TEST_CASE("SoftmaxCEWithLogitsGradient", "SoftmaxCEWithLogitsGradient") {
 
 TEST_CASE("LeakyReluGradient", "LeakyReluGradient") {
 
-  RELUActivationLayer lrelu(0.1f);
+  LeakyRELUActivationLayer lrelu(0.1f);
   const auto activations = Mat2D<float>(
       5, 10, {3.06193989,  2.03888584,  -3.99773113, 4.19482614,  2.142413,
               4.98847007,  -3.50551695, 3.68126057,  -3.37507065, 1.15559564,
