@@ -62,5 +62,6 @@
         "set": "cpp",
         "string": "cpp"
     },
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "python.pythonPath": "plot/.venv/bin/python"
 }

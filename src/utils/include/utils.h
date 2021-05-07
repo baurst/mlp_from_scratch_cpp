@@ -295,7 +295,7 @@ Mat2D<T> Mat2D<T>::reduce_mean_axis(const size_t axis) const {
       (axis == 0 ? this->get_num_cols() : this->get_num_rows());
 
   const auto axis_mean =
-      axis_sum.divide_by(Mat2D<T>(1, 1, {static_cast<T>(1.0 / divisor)}));
+      axis_sum.divide_by(Mat2D<T>(1, 1, {static_cast<T>(divisor)}));
   return axis_mean;
 }
 

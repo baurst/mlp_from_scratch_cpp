@@ -148,7 +148,7 @@ SoftmaxCrossEntropyWithLogitsLoss::loss(const Mat2D<float> &predictions,
   const auto log_probs =
       pred_probs.elementwise_operation([](float x) { return std::log(x); });
 
-  const auto ce = -(labels.hadamard_product(log_probs).reduce_sum_axis(1));
+  const auto ce = -(labels.hadamard_product(log_probs)).reduce_sum_axis(1);
 
   return ce;
 }
