@@ -17,20 +17,16 @@ def train_step(model, optimizer, x_batch_train, y_batch_train):
     return loss_value
 
 
-@tf.function
-def run_validation(model, dataset, acc_metric):
-    acc_metric.reset_states()
-
+def run_validation(model, dataset):
+    acc_metric = tf.keras.metrics.SparseCategoricalAccuracy()
     for x_batch_val, y_batch_val in dataset:
         val_logits = model(x_batch_val, training=False)
         acc_metric.update_state(y_batch_val, val_logits)
     val_acc = acc_metric.result()
-    acc_metric.reset_states()
     return val_acc
 
 
 def main():
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--logfile", type=str, default=None)
     args = parser.parse_args()
@@ -46,7 +42,7 @@ def main():
         [
             tf.keras.layers.Dense(50, activation=leaky_relu_activation),
             tf.keras.layers.Dense(25, activation=leaky_relu_activation),
-            tf.keras.layers.Dense(10),
+            tf.keras.layers.Dense(10, activation=None),
         ]
     )
 
@@ -80,7 +76,6 @@ def main():
     )
 
     global_step = 0
-    acc_metric = tf.keras.metrics.SparseCategoricalAccuracy()
     online_val_accs = []
     log_steps = []
     loss_vals = []
@@ -99,7 +94,7 @@ def main():
             if global_step % log_loss_every_n_steps == 0:
                 loss_vals.append(loss_value)
                 print("Step: {0} - Loss: {1:.4f}".format(global_step, loss_value))
-                online_val_acc = run_validation(model, val_dataset, acc_metric)
+                online_val_acc = run_validation(model, val_dataset)
 
                 log_steps.append(global_step)
                 online_val_accs.append(online_val_acc)
@@ -116,13 +111,12 @@ def main():
                         run_validation(
                             model,
                             train_dataset.take(num_online_val_steps),
-                            acc_metric,
                         ),
                     )
                 )
             global_step += 1
 
-    test_acc = run_validation(model, test_dataset, acc_metric)
+    test_acc = run_validation(model, test_dataset)
     print("\n\nStep: {0} - Test Accuracy: {1:.4f}".format(global_step, test_acc))
     if args.logfile is not None:
         np.savez(

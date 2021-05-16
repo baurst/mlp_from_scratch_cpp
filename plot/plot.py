@@ -36,23 +36,25 @@ def main():
         100.0 * test_accuracy,
         xmin=0,
         xmax=accuracy[-1, 0],
-        color="navy",
-        label="Final Test Accuracy (ours)",
+        color="blue",
+        label="Final Test Accuracy {:.2f}% (ours)".format(100.0 * test_accuracy),
         linestyles="dotted",
     )
     ln_test_acc_tf = ax.hlines(
         100.0 * tf_log["test_accuracy"],
         xmin=0,
         xmax=tf_log["steps"][-1],
-        color="orange",
-        label="Final Test Accuracy (tensorflow)",
+        color="red",
+        label="Final Test Accuracy {:.2f}% (tensorflow)".format(
+            100.0 * tf_log["test_accuracy"]
+        ),
         linestyles="dotted",
     )
 
     ax.set_xlabel("Steps")
     ax.set_ylabel("Accuracy [%]")
 
-    lns = ln_ours_acc + ln_tf_acc + [ln_test_acc_tf] + [ln_test_acc_ours]
+    lns = ln_ours_acc + [ln_test_acc_ours] + ln_tf_acc + [ln_test_acc_tf]
     labs = [plot.get_label() for plot in lns]
     ax.legend(lns, labs, loc="center right")
 
