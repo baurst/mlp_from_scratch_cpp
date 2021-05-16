@@ -6,9 +6,9 @@
 #include <sstream>
 #include <tuple>
 #include <vector>
-std::vector<std::pair<Mat2D<float>, Mat2D<float>>>
-read_mnist_csv(const std::string csv_filename, const size_t batch_size,
-               const int64_t num_batches_to_load) {
+std::vector<std::pair<Mat2D<float>, Mat2D<float>>> read_mnist_csv(
+    const std::string csv_filename, const size_t batch_size,
+    const int64_t num_batches_to_load) {
   std::cout << "Loading MNIST dataset from " << csv_filename << std::endl;
   std::vector<std::pair<Mat2D<float>, Mat2D<float>>> dataset;
   std::ifstream ds_file(csv_filename);
@@ -35,7 +35,7 @@ read_mnist_csv(const std::string csv_filename, const size_t batch_size,
 
     std::vector<float> image_vector(line_split.size());
     std::transform(line_split.begin(), line_split.end(), image_vector.begin(),
-                   [](const std::string &val) { return std::stof(val); });
+                   [](const std::string& val) { return std::stof(val); });
     for (size_t pixel_idx = 0; pixel_idx < 784; ++pixel_idx) {
       flat_images(batch_idx, pixel_idx) = image_vector[pixel_idx] / 256.0 - 0.5;
     }

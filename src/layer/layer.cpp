@@ -1,8 +1,8 @@
 #include "layer.h"
-#include "utils.h"
+#include <math.h>
 #include <algorithm>
 #include <iostream>
-#include <math.h>
+#include "utils.h"
 
 Layer::Layer() {}
 Layer::~Layer() {}
@@ -17,15 +17,15 @@ DenseLayer::DenseLayer(size_t number_of_inputs, size_t number_of_neurons,
 
 DenseLayer::~DenseLayer() {}
 
-Mat2D<float> DenseLayer::forward(const Mat2D<float> &input) const {
+Mat2D<float> DenseLayer::forward(const Mat2D<float>& input) const {
   const auto dot_prod = input.dot_product(weights);
   const auto result = dot_prod.add(biases);
   return result;
 }
 
-Mat2D<float> DenseLayer::backward(const Mat2D<float> &input,
-                                  const Mat2D<float> &gradients_output,
-                                  const Mat2D<float> &learning_rate) {
+Mat2D<float> DenseLayer::backward(const Mat2D<float>& input,
+                                  const Mat2D<float>& gradients_output,
+                                  const Mat2D<float>& learning_rate) {
   const auto grad_input =
       gradients_output.dot_product(this->weights.transpose());
   const auto grad_weights = input.transpose().dot_product(gradients_output);
@@ -55,18 +55,17 @@ LeakyRELUActivationLayer::LeakyRELUActivationLayer(const float alpha)
   std::cout << "LeakyRELUActivationLayer: alpha: " << alpha << std::endl;
 }
 
-Mat2D<float>
-LeakyRELUActivationLayer::forward(const Mat2D<float> &input) const {
+Mat2D<float> LeakyRELUActivationLayer::forward(
+    const Mat2D<float>& input) const {
   auto tmp_in = input;
   Mat2D<float> result = tmp_in.elementwise_operation(
       [this](float x) { return std::max(this->alpha * x, x); });
 
   return result;
 }
-Mat2D<float>
-LeakyRELUActivationLayer::backward(const Mat2D<float> &input,
-                                   const Mat2D<float> &gradient_output,
-                                   const Mat2D<float> &learning_rate) {
+Mat2D<float> LeakyRELUActivationLayer::backward(
+    const Mat2D<float>& input, const Mat2D<float>& gradient_output,
+    const Mat2D<float>& learning_rate) {
   // learning_rate not used since no trainable parameters - silence warning:
 
   std::ignore = learning_rate;
@@ -83,17 +82,16 @@ SigmoidActivationLayer::SigmoidActivationLayer() {
   std::cout << "SigmoidActivationLayer" << std::endl;
 }
 
-Mat2D<float> SigmoidActivationLayer::forward(const Mat2D<float> &input) const {
+Mat2D<float> SigmoidActivationLayer::forward(const Mat2D<float>& input) const {
   auto tmp_in = input;
   Mat2D<float> result = tmp_in.elementwise_operation(
       [](float x) { return 1.0 / (1 + std::exp(-x)); });
 
   return result;
 }
-Mat2D<float>
-SigmoidActivationLayer::backward(const Mat2D<float> &input,
-                                 const Mat2D<float> &gradient_output,
-                                 const Mat2D<float> &learning_rate) {
+Mat2D<float> SigmoidActivationLayer::backward(
+    const Mat2D<float>& input, const Mat2D<float>& gradient_output,
+    const Mat2D<float>& learning_rate) {
   // learning_rate not used since no trainable parameters - silence warning:
   std::ignore = learning_rate;
 
@@ -111,15 +109,15 @@ MSELoss::~MSELoss() {}
 
 MSELoss::MSELoss() {}
 
-Mat2D<float> MSELoss::loss(const Mat2D<float> &predictions,
-                           const Mat2D<float> &labels) const {
+Mat2D<float> MSELoss::loss(const Mat2D<float>& predictions,
+                           const Mat2D<float>& labels) const {
   const auto diff = predictions.minus(labels);
   const auto loss = diff.hadamard_product(diff);
   return loss;
 }
 
-Mat2D<float> MSELoss::loss_grad(const Mat2D<float> &predictions,
-                                const Mat2D<float> &labels) const {
+Mat2D<float> MSELoss::loss_grad(const Mat2D<float>& predictions,
+                                const Mat2D<float>& labels) const {
   return predictions.minus(labels);
 }
 
@@ -127,7 +125,7 @@ SoftmaxCrossEntropyWithLogitsLoss::~SoftmaxCrossEntropyWithLogitsLoss() {}
 
 SoftmaxCrossEntropyWithLogitsLoss::SoftmaxCrossEntropyWithLogitsLoss() {}
 
-Mat2D<float> softmax(const Mat2D<float> &logits) {
+Mat2D<float> softmax(const Mat2D<float>& logits) {
   const auto logits_max = logits.reduce_max_axis(1);
   auto stable_logits = logits;
 
@@ -140,9 +138,8 @@ Mat2D<float> softmax(const Mat2D<float> &logits) {
   auto probs = logits_exp.divide_by(logits_exp_sum);
   return probs;
 }
-Mat2D<float>
-SoftmaxCrossEntropyWithLogitsLoss::loss(const Mat2D<float> &predictions,
-                                        const Mat2D<float> &labels) const {
+Mat2D<float> SoftmaxCrossEntropyWithLogitsLoss::loss(
+    const Mat2D<float>& predictions, const Mat2D<float>& labels) const {
   auto pred_probs = softmax(predictions);
 
   const auto log_probs =
@@ -154,7 +151,7 @@ SoftmaxCrossEntropyWithLogitsLoss::loss(const Mat2D<float> &predictions,
 }
 
 Mat2D<float> SoftmaxCrossEntropyWithLogitsLoss::loss_grad(
-    const Mat2D<float> &predictions, const Mat2D<float> &labels_one_hot) const {
+    const Mat2D<float>& predictions, const Mat2D<float>& labels_one_hot) const {
   auto pred_tmp = predictions;
   const auto pred_probs = softmax(pred_tmp);
   // average gradient over minibatch

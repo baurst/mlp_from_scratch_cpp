@@ -1,7 +1,8 @@
 #define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
+
 #include "layer.h"
 #include "utils.h"
-#include <catch2/catch.hpp>
 
 int factorial(int foo) {
   int result = 1;
@@ -102,7 +103,6 @@ TEST_CASE("Reduce axis", "reduce_(max|sum)_axis") {
 }
 
 TEST_CASE("Addition/Subtraction", "Addition/Subtraction") {
-
   const auto A = Mat2D<float>(
       10, 10, {0.,  8.,  16., 24., 32., 40., 48., 56., 64., 72., 0.,  7.,  14.,
                21., 28., 35., 42., 49., 56., 63., 0.,  2.,  4.,  6.,  8.,  10.,
@@ -262,7 +262,7 @@ TEST_CASE("SoftmaxCEWithLogits", "SoftmaxCEWithLogits") {
                            0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.});
   const auto ce_layer = SoftmaxCrossEntropyWithLogitsLoss();
   const auto ce_batched = ce_layer.loss(predictions, labels_one_hot);
-  const auto ce = ce_batched.reduce_sum();
+  const auto ce = ce_batched.reduce_mean();
   REQUIRE(ce == 3.4716506004333496_a);
 }
 
@@ -304,8 +304,7 @@ TEST_CASE("SoftmaxCEWithLogitsGradient", "SoftmaxCEWithLogitsGradient") {
 
   const auto ce_layer = SoftmaxCrossEntropyWithLogitsLoss();
   const auto ce_batched = ce_layer.loss(predictions, labels_one_hot);
-  const auto ce = ce_batched.reduce_sum();
-  //   REQUIRE(ce == 5.948966026306152);
+  const auto ce = ce_batched.reduce_mean();
   REQUIRE(ce == 3.4716506004333496_a);
 
   const auto grad_test = ce_layer.loss_grad(predictions, labels_one_hot);
@@ -316,7 +315,6 @@ TEST_CASE("SoftmaxCEWithLogitsGradient", "SoftmaxCEWithLogitsGradient") {
 }
 
 TEST_CASE("LeakyReluGradient", "LeakyReluGradient") {
-
   LeakyRELUActivationLayer lrelu(0.1f);
   const auto activations = Mat2D<float>(
       5, 10, {3.06193989,  2.03888584,  -3.99773113, 4.19482614,  2.142413,
@@ -345,7 +343,6 @@ TEST_CASE("LeakyReluGradient", "LeakyReluGradient") {
 }
 
 TEST_CASE("BiasInit", "BiasInit") {
-
   DenseLayer layer(10, 5);
   std::vector<float> zeros(5, 0.0);
 

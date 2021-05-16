@@ -7,7 +7,8 @@
 #include <stdexcept>
 #include <vector>
 
-template <typename T> void print_vec(std::vector<T> const &vec) {
+template <typename T>
+void print_vec(std::vector<T> const& vec) {
   std::cout << "[";
   for (const auto el : vec) {
     std::cout << el << ',';
@@ -16,7 +17,7 @@ template <typename T> void print_vec(std::vector<T> const &vec) {
 }
 
 template <typename T>
-void print_vec_of_vecs(std::vector<std::vector<T>> const &vec) {
+void print_vec_of_vecs(std::vector<std::vector<T>> const& vec) {
   std::cout << "[" << std::endl;
   for (const auto el : vec) {
     print_vec(el);
@@ -24,8 +25,8 @@ void print_vec_of_vecs(std::vector<std::vector<T>> const &vec) {
   std::cout << "]" << std::endl;
 }
 
-template <typename T> T dot(const std::vector<T> x, const std::vector<T> y) {
-
+template <typename T>
+T dot(const std::vector<T> x, const std::vector<T> y) {
   if (x.size() != y.size()) {
     throw std::runtime_error("Vector size mismatch in dot product.");
   }
@@ -35,23 +36,23 @@ template <typename T> T dot(const std::vector<T> x, const std::vector<T> y) {
 
 enum Initializer { ZEROS, RANDOM_UNIFORM };
 
-template <class T> class Mat2D {
-public:
+template <class T>
+class Mat2D {
+ public:
   Mat2D(const size_t rows, const size_t cols, Initializer = ZEROS);
   Mat2D(std::vector<std::vector<T>> data);
   // Mat2D(const Mat2D<T> &other); // copy constructor
   //~Mat2D();
   Mat2D(const size_t num_rows, const size_t num_cols, std::vector<T> data);
-  T &operator()(size_t row_idx, size_t col_idx);
+  T& operator()(size_t row_idx, size_t col_idx);
   T operator()(size_t row_idx, size_t col_idx) const;
-  Mat2D<T> dot_product(const Mat2D<T> &other) const;
-  Mat2D<T> add(const Mat2D<T> &other) const;
-  Mat2D<T> divide_by(const Mat2D<T> &other) const;
-  Mat2D<T> minus(const Mat2D<T> &other) const;
-  Mat2D<T> hadamard_product(const Mat2D<T> &other) const;
-  Mat2D<T>
-  elementwise_combination_w_broadcast(const Mat2D<T> &other,
-                                      std::function<T(T, T)> modifier) const;
+  Mat2D<T> dot_product(const Mat2D<T>& other) const;
+  Mat2D<T> add(const Mat2D<T>& other) const;
+  Mat2D<T> divide_by(const Mat2D<T>& other) const;
+  Mat2D<T> minus(const Mat2D<T>& other) const;
+  Mat2D<T> hadamard_product(const Mat2D<T>& other) const;
+  Mat2D<T> elementwise_combination_w_broadcast(
+      const Mat2D<T>& other, std::function<T(T, T)> modifier) const;
   Mat2D<T> elementwise_operation(std::function<T(T)> modifier);
   T reduce_sum() const;
   Mat2D<T> reduce_sum_axis(const size_t axis) const;
@@ -64,27 +65,30 @@ public:
   size_t get_num_cols() const;
 
   template <typename U>
-  friend std::ostream &operator<<(std::ostream &os, const Mat2D<U> &);
+  friend std::ostream& operator<<(std::ostream& os, const Mat2D<U>&);
   // Mat2D<T> &operator=(const Mat2D<T> &other); // assignment operator
-  template <typename U> Mat2D<T> &operator+(const Mat2D<U> &classObj);
-  template <typename U> Mat2D<T> &operator-(const Mat2D<U> &classObj);
+  template <typename U>
+  Mat2D<T>& operator+(const Mat2D<U>& classObj);
+  template <typename U>
+  Mat2D<T>& operator-(const Mat2D<U>& classObj);
   Mat2D<T> operator-();
 
   std::vector<T> matrix_data;
 
-private:
+ private:
   size_t num_rows;
   size_t num_cols;
 };
 
 template <class T>
 template <typename U>
-Mat2D<T> &Mat2D<T>::operator+(const Mat2D<U> &other) {
+Mat2D<T>& Mat2D<T>::operator+(const Mat2D<U>& other) {
   // ...
   return this->add(other);
 }
 
-template <class T> Mat2D<T> Mat2D<T>::operator-() {
+template <class T>
+Mat2D<T> Mat2D<T>::operator-() {
   const auto result =
       this->elementwise_operation([](T x) { return static_cast<T>(-1.0) * x; });
   return result;
@@ -92,7 +96,7 @@ template <class T> Mat2D<T> Mat2D<T>::operator-() {
 
 template <class T>
 template <typename U>
-Mat2D<T> &Mat2D<T>::operator-(const Mat2D<U> &other) {
+Mat2D<T>& Mat2D<T>::operator-(const Mat2D<U>& other) {
   const Mat2D<T> minus_one(0, 0, std::vector({-1.0}));
   return this->add(other);
 }
@@ -128,21 +132,27 @@ Mat2D<T>::Mat2D(const size_t num_rows, const size_t num_cols,
                 const Initializer init)
     : matrix_data(num_rows * num_cols), num_rows(num_rows), num_cols(num_cols) {
   switch (init) {
-  case Initializer::ZEROS:
-    std::fill(this->matrix_data.begin(), this->matrix_data.end(),
-              static_cast<T>(0));
-    break;
-  case Initializer::RANDOM_UNIFORM:
-    std::default_random_engine generator;
-    std::uniform_real_distribution<double> distribution(-0.1, 0.1);
-    std::generate(this->matrix_data.begin(), this->matrix_data.end(),
-                  [&]() { return static_cast<T>(distribution(generator)); });
-    break;
+    case Initializer::ZEROS:
+      std::fill(this->matrix_data.begin(), this->matrix_data.end(),
+                static_cast<T>(0));
+      break;
+    case Initializer::RANDOM_UNIFORM:
+      std::default_random_engine generator;
+      std::uniform_real_distribution<double> distribution(-0.1, 0.1);
+      std::generate(this->matrix_data.begin(), this->matrix_data.end(),
+                    [&]() { return static_cast<T>(distribution(generator)); });
+      break;
   }
 }
 
-template <class T> size_t Mat2D<T>::get_num_rows() const { return num_rows; }
-template <class T> size_t Mat2D<T>::get_num_cols() const { return num_cols; }
+template <class T>
+size_t Mat2D<T>::get_num_rows() const {
+  return num_rows;
+}
+template <class T>
+size_t Mat2D<T>::get_num_cols() const {
+  return num_cols;
+}
 
 template <class T>
 Mat2D<T>::Mat2D(std::vector<std::vector<T>> data)
@@ -155,7 +165,8 @@ Mat2D<T>::Mat2D(std::vector<std::vector<T>> data)
   }
 }
 
-template <class T> T &Mat2D<T>::operator()(size_t row_idx, size_t col_idx) {
+template <class T>
+T& Mat2D<T>::operator()(size_t row_idx, size_t col_idx) {
   return matrix_data[row_idx * num_cols + col_idx];
 }
 
@@ -173,8 +184,8 @@ Mat2D<T> Mat2D<T>::elementwise_operation(std::function<T(T)> modifier) {
   return *this;
 }
 
-template <class T> Mat2D<T> Mat2D<T>::dot_product(const Mat2D<T> &other) const {
-
+template <class T>
+Mat2D<T> Mat2D<T>::dot_product(const Mat2D<T>& other) const {
   if (num_cols != other.num_rows) {
     throw std::runtime_error(
         "Dot Product: AxB=C -> A.num_cols != B.num_rows (size mismatch).");
@@ -191,15 +202,18 @@ template <class T> Mat2D<T> Mat2D<T>::dot_product(const Mat2D<T> &other) const {
   return result;
 }
 
-template <class T> Mat2D<T> Mat2D<T>::add(const Mat2D<T> &other) const {
+template <class T>
+Mat2D<T> Mat2D<T>::add(const Mat2D<T>& other) const {
   return this->elementwise_combination_w_broadcast(other, std::plus<T>());
 }
 
-template <class T> T Mat2D<T>::reduce_sum() const {
+template <class T>
+T Mat2D<T>::reduce_sum() const {
   return std::accumulate(matrix_data.begin(), matrix_data.end(), T());
 }
 
-template <class T> Mat2D<T> Mat2D<T>::reduce_max_axis(const size_t axis) const {
+template <class T>
+Mat2D<T> Mat2D<T>::reduce_max_axis(const size_t axis) const {
   const auto argmax_indices = this->argmax(axis);
   const auto num_result_rows = argmax_indices.get_num_rows();
   const auto num_result_cols = argmax_indices.get_num_cols();
@@ -219,7 +233,8 @@ template <class T> Mat2D<T> Mat2D<T>::reduce_max_axis(const size_t axis) const {
   return max_vals;
 }
 
-template <class T> Mat2D<size_t> Mat2D<T>::argmax(const size_t axis) const {
+template <class T>
+Mat2D<size_t> Mat2D<T>::argmax(const size_t axis) const {
   const auto num_result_rows = (axis == 0 ? 1 : this->get_num_rows());
   const auto num_result_cols = (axis == 0 ? this->get_num_cols() : 1);
 
@@ -257,7 +272,8 @@ template <class T> Mat2D<size_t> Mat2D<T>::argmax(const size_t axis) const {
   return argmax_indices;
 }
 
-template <class T> Mat2D<T> Mat2D<T>::reduce_sum_axis(const size_t axis) const {
+template <class T>
+Mat2D<T> Mat2D<T>::reduce_sum_axis(const size_t axis) const {
   const auto num_result_rows = (axis == 0 ? 1 : this->get_num_rows());
   const auto num_result_cols = (axis == 1 ? 1 : this->get_num_cols());
   Mat2D<T> result(num_result_rows, num_result_cols);
@@ -283,7 +299,8 @@ template <class T> Mat2D<T> Mat2D<T>::reduce_sum_axis(const size_t axis) const {
   return result;
 }
 
-template <class T> T Mat2D<T>::reduce_mean() const {
+template <class T>
+T Mat2D<T>::reduce_mean() const {
   return this->reduce_sum() / static_cast<T>(this->get_num_rows()) /
          static_cast<T>(this->get_num_cols());
 }
@@ -299,22 +316,24 @@ Mat2D<T> Mat2D<T>::reduce_mean_axis(const size_t axis) const {
   return axis_mean;
 }
 
-template <class T> Mat2D<T> Mat2D<T>::minus(const Mat2D<T> &other) const {
+template <class T>
+Mat2D<T> Mat2D<T>::minus(const Mat2D<T>& other) const {
   return this->elementwise_combination_w_broadcast(other, std::minus<T>());
 }
 
-template <class T> Mat2D<T> Mat2D<T>::divide_by(const Mat2D<T> &other) const {
+template <class T>
+Mat2D<T> Mat2D<T>::divide_by(const Mat2D<T>& other) const {
   return this->elementwise_combination_w_broadcast(other, std::divides<T>());
 }
 
 template <class T>
-Mat2D<T> Mat2D<T>::hadamard_product(const Mat2D<T> &other) const {
+Mat2D<T> Mat2D<T>::hadamard_product(const Mat2D<T>& other) const {
   return this->elementwise_combination_w_broadcast(other, std::multiplies<T>());
 }
 
 template <class T>
 Mat2D<T> Mat2D<T>::elementwise_combination_w_broadcast(
-    const Mat2D<T> &other, std::function<T(T, T)> modifier) const {
+    const Mat2D<T>& other, std::function<T(T, T)> modifier) const {
   Mat2D<T> result(std::max(other.get_num_rows(), get_num_rows()),
                   std::max(other.get_num_cols(), get_num_cols()));
 
@@ -333,7 +352,6 @@ Mat2D<T> Mat2D<T>::elementwise_combination_w_broadcast(
 
   if (other.get_num_rows() == get_num_rows() &&
       other.get_num_cols() == get_num_cols()) {
-
     for (size_t row_idx = 0; row_idx < get_num_rows(); ++row_idx) {
       for (size_t col_idx = 0; col_idx < get_num_cols(); ++col_idx) {
         result(row_idx, col_idx) = modifier(this->operator()(row_idx, col_idx),
@@ -365,7 +383,6 @@ Mat2D<T> Mat2D<T>::elementwise_combination_w_broadcast(
 
     for (size_t row_idx = 0; row_idx < result.get_num_rows(); ++row_idx) {
       for (size_t col_idx = 0; col_idx < result.get_num_cols(); ++col_idx) {
-
         const T val_a =
             this->operator()(std::clamp(row_idx, zero, max_rows - 1),
                              std::clamp(col_idx, zero, max_cols - 1));
@@ -379,7 +396,8 @@ Mat2D<T> Mat2D<T>::elementwise_combination_w_broadcast(
   return result;
 }
 
-template <class T> Mat2D<T> Mat2D<T>::transpose() const {
+template <class T>
+Mat2D<T> Mat2D<T>::transpose() const {
   Mat2D<T> result(num_cols, num_rows);
   for (size_t i = 0; i < num_rows; ++i) {
     for (size_t k = 0; k < num_cols; ++k) {
@@ -390,7 +408,7 @@ template <class T> Mat2D<T> Mat2D<T>::transpose() const {
 }
 
 template <typename T>
-std::ostream &operator<<(std::ostream &os, const Mat2D<T> &mat) {
+std::ostream& operator<<(std::ostream& os, const Mat2D<T>& mat) {
   os << "[" << std::endl;
   for (size_t row_idx = 0; row_idx < mat.get_num_rows(); ++row_idx) {
     os << "[";
