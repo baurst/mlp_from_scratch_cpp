@@ -22,11 +22,6 @@ MLP::MLP(const std::vector<size_t> layer_sizes, const size_t number_of_inputs,
     layer_idx++;
     std::cout << "Layer " << layer_idx << ": ";
     layers.push_back(std::make_unique<LeakyRELUActivationLayer>(0.1));
-    // layers.push_back(std::make_unique<SigmoidActivationLayer>());
-    // std::cout << "Created SigmoidActivationLayer with layer_idx " <<
-    // layer_idx
-    //           << std::endl;
-    // layer_idx++;
   }
   std::cout << "Layer " << layer_idx << ": ";
   layers.push_back(std::make_unique<DenseLayer>(input_size, number_of_targets));
@@ -50,7 +45,7 @@ std::vector<Mat2D<float>> MLP::forward(const Mat2D<float> &input) const
 }
 
 float MLP::train(const Mat2D<float> &input, const Mat2D<float> &target_label,
-                 const Loss &loss_obj, const Mat2D<float> &learning_rate)
+                 const Loss &loss_obj, const float learning_rate)
 {
   const auto activations = this->forward(input);
   const auto logits = activations.back();
@@ -64,13 +59,15 @@ float MLP::train(const Mat2D<float> &input, const Mat2D<float> &target_label,
     throw std::runtime_error("Encountered NAN in Gradient, we are doomed! "
                              "Maybe try lowering the learning rate.");
   }
+  const auto lr_mat = Mat2D<float>(
+      1, 1, {learning_rate});
 
   for (int32_t layer_idx = this->layers.size() - 1; layer_idx >= 0;
        --layer_idx)
   {
     const auto layer_input = activations[layer_idx];
 
-    grad = this->layers[layer_idx]->backward(layer_input, grad, learning_rate);
+    grad = this->layers[layer_idx]->backward(layer_input, grad, lr_mat);
   }
   const auto avg_loss = loss.reduce_mean();
 
