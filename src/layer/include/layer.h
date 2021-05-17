@@ -1,6 +1,7 @@
 #pragma once
 #include <numeric>
 #include <vector>
+
 #include "utils.h"
 
 class Layer {
@@ -8,7 +9,7 @@ class Layer {
   virtual Mat2D<float> forward(const Mat2D<float>& input) const = 0;
   virtual Mat2D<float> backward(const Mat2D<float>& input,
                                 const Mat2D<float>& gradients_output,
-                                const Mat2D<float>& learning_rate) = 0;
+                                float learning_rate) = 0;
   virtual void print_trainable_variables() const = 0;
   Layer();
   virtual ~Layer() = 0;
@@ -25,7 +26,7 @@ class DenseLayer : public Layer {
   Mat2D<float> forward(const Mat2D<float>& input) const override;
   Mat2D<float> backward(const Mat2D<float>& input,
                         const Mat2D<float>& gradients_output,
-                        const Mat2D<float>& learning_rate) override;
+                        const float learning_rate) override;
   void print_trainable_variables() const override;
 
   Mat2D<float> weights;
@@ -41,7 +42,7 @@ class LeakyRELUActivationLayer : public Layer {
   Mat2D<float> forward(const Mat2D<float>& input) const override;
   Mat2D<float> backward(const Mat2D<float>& input,
                         const Mat2D<float>& gradients_output,
-                        const Mat2D<float>& learning_rate) override;
+                        const float learning_rate) override;
   void print_trainable_variables() const override;
   float alpha = 0.0;
 
@@ -55,7 +56,7 @@ class SigmoidActivationLayer : public Layer {
   Mat2D<float> forward(const Mat2D<float>& input) const override;
   Mat2D<float> backward(const Mat2D<float>& input,
                         const Mat2D<float>& gradients_output,
-                        const Mat2D<float>& learning_rate) override;
+                        const float learning_rate) override;
   void print_trainable_variables() const override;
 
  private:
@@ -68,7 +69,7 @@ class SoftmaxActivationLayer : public Layer {
   Mat2D<float> forward(const Mat2D<float>& input) const override;
   Mat2D<float> backward(const Mat2D<float>& input,
                         const Mat2D<float>& gradients_output,
-                        const Mat2D<float>& learning_rate) override;
+                        const float learning_rate) override;
   void print_trainable_variables() const override;
 
  private:

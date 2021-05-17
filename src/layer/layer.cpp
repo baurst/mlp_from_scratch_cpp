@@ -1,7 +1,10 @@
 #include "layer.h"
+
 #include <math.h>
+
 #include <algorithm>
 #include <iostream>
+
 #include "utils.h"
 
 Layer::Layer() {}
@@ -25,14 +28,15 @@ Mat2D<float> DenseLayer::forward(const Mat2D<float>& input) const {
 
 Mat2D<float> DenseLayer::backward(const Mat2D<float>& input,
                                   const Mat2D<float>& gradients_output,
-                                  const Mat2D<float>& learning_rate) {
+                                  const float learning_rate) {
   const auto grad_input =
       gradients_output.dot_product(this->weights.transpose());
   const auto grad_weights = input.transpose().dot_product(gradients_output);
   const auto grad_biases = gradients_output.reduce_sum_axis(0);
 
-  const auto weight_update = learning_rate.hadamard_product(grad_weights);
-  const auto bias_update = learning_rate.hadamard_product(grad_biases);
+  const auto lr_mat = Mat2D<float>(1, 1, {learning_rate});
+  const auto weight_update = lr_mat.hadamard_product(grad_weights);
+  const auto bias_update = lr_mat.hadamard_product(grad_biases);
   this->weights = this->weights.minus(weight_update);
   this->biases = this->biases.minus(bias_update);
 
@@ -65,7 +69,7 @@ Mat2D<float> LeakyRELUActivationLayer::forward(
 }
 Mat2D<float> LeakyRELUActivationLayer::backward(
     const Mat2D<float>& input, const Mat2D<float>& gradient_output,
-    const Mat2D<float>& learning_rate) {
+    const float learning_rate) {
   // learning_rate not used since no trainable parameters - silence warning:
 
   std::ignore = learning_rate;
@@ -91,7 +95,7 @@ Mat2D<float> SigmoidActivationLayer::forward(const Mat2D<float>& input) const {
 }
 Mat2D<float> SigmoidActivationLayer::backward(
     const Mat2D<float>& input, const Mat2D<float>& gradient_output,
-    const Mat2D<float>& learning_rate) {
+    const float learning_rate) {
   // learning_rate not used since no trainable parameters - silence warning:
   std::ignore = learning_rate;
 

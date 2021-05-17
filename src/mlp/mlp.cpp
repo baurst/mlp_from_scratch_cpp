@@ -1,9 +1,12 @@
 #include "mlp.h"
+
 #include <math.h>
+
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <vector>
+
 #include "layer.h"
 #include "utils.h"
 
@@ -54,13 +57,12 @@ float MLP::train(const Mat2D<float>& input, const Mat2D<float>& target_label,
         "Encountered NAN in Gradient, we are doomed! "
         "Maybe try lowering the learning rate.");
   }
-  const auto lr_mat = Mat2D<float>(1, 1, {learning_rate});
 
   for (int32_t layer_idx = this->layers.size() - 1; layer_idx >= 0;
        --layer_idx) {
     const auto layer_input = activations[layer_idx];
 
-    grad = this->layers[layer_idx]->backward(layer_input, grad, lr_mat);
+    grad = this->layers[layer_idx]->backward(layer_input, grad, learning_rate);
   }
   const auto avg_loss = loss.reduce_mean();
 

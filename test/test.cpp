@@ -335,8 +335,7 @@ TEST_CASE("LeakyReluGradient", "LeakyReluGradient") {
   std::vector<float> ones(5 * 10, 1.0);
   const auto grads_at_output = Mat2D<float>(5, 10, ones);
 
-  const auto grads_actual =
-      lrelu.backward(activations, grads_at_output, Mat2D<float>(1, 1, {0.0f}));
+  const auto grads_actual = lrelu.backward(activations, grads_at_output, 0.0f);
 
   REQUIRE_THAT(grads_actual.matrix_data,
                Catch::Approx(gradients_exp.matrix_data).epsilon(1.e-5));

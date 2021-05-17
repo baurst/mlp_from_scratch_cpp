@@ -60,7 +60,9 @@
         "memory_resource": "cpp",
         "random": "cpp",
         "set": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "queue": "cpp",
+        "stack": "cpp"
     },
     "editor.formatOnSave": true,
     "python.pythonPath": "plot/.venv/bin/python"
