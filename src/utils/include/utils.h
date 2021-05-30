@@ -5,6 +5,7 @@
 #include <numeric>
 #include <random>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 template <typename T>
@@ -187,8 +188,10 @@ Mat2D<T> Mat2D<T>::elementwise_operation(std::function<T(T)> modifier) {
 template <class T>
 Mat2D<T> Mat2D<T>::dot_product(const Mat2D<T>& other) const {
   if (num_cols != other.num_rows) {
-    throw std::runtime_error(
-        "Dot Product: AxB=C -> A.num_cols != B.num_rows (size mismatch).");
+    throw std::runtime_error("Dot Product: AxB=C -> A.num_cols (" +
+                             std::to_string(num_cols) + ") != B.num_rows (" +
+                             std::to_string(other.num_rows) +
+                             ") size mismatch).");
   }
 
   Mat2D<T> result(num_rows, other.num_cols);
