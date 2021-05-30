@@ -38,11 +38,25 @@ def main():
     epochs = 10
 
     leaky_relu_activation = tf.keras.layers.LeakyReLU(alpha=0.1)
+    kernel_initializer = tf.keras.initializers.RandomUniform(
+        minval=-0.1, maxval=0.1, seed=None
+    )
+
     model = tf.keras.Sequential(
         [
-            tf.keras.layers.Dense(50, activation=leaky_relu_activation),
-            tf.keras.layers.Dense(25, activation=leaky_relu_activation),
-            tf.keras.layers.Dense(10, activation=None),
+            tf.keras.layers.Dense(
+                50,
+                activation=leaky_relu_activation,
+                kernel_initializer=kernel_initializer,
+            ),
+            tf.keras.layers.Dense(
+                25,
+                activation=leaky_relu_activation,
+                kernel_initializer=kernel_initializer,
+            ),
+            tf.keras.layers.Dense(
+                10, activation=None, kernel_initializer=kernel_initializer
+            ),
         ]
     )
 

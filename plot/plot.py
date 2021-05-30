@@ -38,7 +38,7 @@ def main():
         xmax=accuracy[-1, 0],
         color="blue",
         label="Final Test Accuracy {:.2f}% (ours)".format(100.0 * test_accuracy),
-        linestyles="dotted",
+        linestyles="--",
     )
     ln_test_acc_tf = ax.hlines(
         100.0 * tf_log["test_accuracy"],
@@ -48,7 +48,7 @@ def main():
         label="Final Test Accuracy {:.2f}% (tensorflow)".format(
             100.0 * tf_log["test_accuracy"]
         ),
-        linestyles="dotted",
+        linestyles="-.",
     )
 
     ax.set_xlabel("Steps")
