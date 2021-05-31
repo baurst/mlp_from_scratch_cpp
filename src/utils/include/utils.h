@@ -52,6 +52,12 @@ class Mat2D {
   Mat2D<T> divide_by(const Mat2D<T>& other) const;
   Mat2D<T> minus(const Mat2D<T>& other) const;
   Mat2D<T> hadamard_product(const Mat2D<T>& other) const;
+  Mat2D<T> add(const T other) const;
+  Mat2D<T> divide_by(const T other) const;
+  Mat2D<T> minus(const T other) const;
+  Mat2D<T> hadamard_product(const T other) const;
+
+
   Mat2D<T> elementwise_combination_w_broadcast(
       const Mat2D<T>& other, std::function<T(T, T)> modifier) const;
   Mat2D<T> elementwise_operation(std::function<T(T)> modifier);
@@ -205,10 +211,6 @@ Mat2D<T> Mat2D<T>::dot_product(const Mat2D<T>& other) const {
   return result;
 }
 
-template <class T>
-Mat2D<T> Mat2D<T>::add(const Mat2D<T>& other) const {
-  return this->elementwise_combination_w_broadcast(other, std::plus<T>());
-}
 
 template <class T>
 T Mat2D<T>::reduce_sum() const {
@@ -320,6 +322,11 @@ Mat2D<T> Mat2D<T>::reduce_mean_axis(const size_t axis) const {
 }
 
 template <class T>
+Mat2D<T> Mat2D<T>::add(const Mat2D<T>& other) const {
+  return this->elementwise_combination_w_broadcast(other, std::plus<T>());
+}
+
+template <class T>
 Mat2D<T> Mat2D<T>::minus(const Mat2D<T>& other) const {
   return this->elementwise_combination_w_broadcast(other, std::minus<T>());
 }
@@ -332,6 +339,30 @@ Mat2D<T> Mat2D<T>::divide_by(const Mat2D<T>& other) const {
 template <class T>
 Mat2D<T> Mat2D<T>::hadamard_product(const Mat2D<T>& other) const {
   return this->elementwise_combination_w_broadcast(other, std::multiplies<T>());
+}
+
+template <class T>
+Mat2D<T> Mat2D<T>::add(const T other) const {
+  const Mat2D mat_other(1,1,{other});
+  return this->elementwise_combination_w_broadcast(mat_other, std::plus<T>());
+}
+
+template <class T>
+Mat2D<T> Mat2D<T>::minus(const T other) const {
+  const Mat2D mat_other(1,1,{other});
+  return this->elementwise_combination_w_broadcast(mat_other, std::minus<T>());
+}
+
+template <class T>
+Mat2D<T> Mat2D<T>::divide_by(const T other) const {
+  const Mat2D mat_other(1,1,{other});
+  return this->elementwise_combination_w_broadcast(mat_other, std::divides<T>());
+}
+
+template <class T>
+Mat2D<T> Mat2D<T>::hadamard_product(const T other) const {
+  const Mat2D mat_other(1,1,{other});
+  return this->elementwise_combination_w_broadcast(mat_other, std::multiplies<T>());
 }
 
 template <class T>

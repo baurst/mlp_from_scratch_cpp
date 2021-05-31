@@ -34,9 +34,8 @@ Mat2D<float> DenseLayer::backward(const Mat2D<float>& input,
   const auto grad_weights = input.transpose().dot_product(gradients_output);
   const auto grad_biases = gradients_output.reduce_sum_axis(0);
 
-  const auto lr_mat = Mat2D<float>(1, 1, {learning_rate});
-  const auto weight_update = lr_mat.hadamard_product(grad_weights);
-  const auto bias_update = lr_mat.hadamard_product(grad_biases);
+  const auto weight_update = grad_weights.hadamard_product(learning_rate);
+  const auto bias_update = grad_biases.hadamard_product(learning_rate);
   this->weights = this->weights.minus(weight_update);
   this->biases = this->biases.minus(bias_update);
 
