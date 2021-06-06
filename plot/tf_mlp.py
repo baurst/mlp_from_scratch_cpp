@@ -11,7 +11,6 @@ def train_step(model, optimizer, x_batch_train, y_batch_train):
             tf.cast(y_batch_train, tf.int32), logits
         )
         loss_value = tf.reduce_mean(loss_value)
-
     grads = tape.gradient(loss_value, model.trainable_weights)
     optimizer.apply_gradients(zip(grads, model.trainable_weights))
     return loss_value
