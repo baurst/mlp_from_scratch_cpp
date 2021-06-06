@@ -85,13 +85,11 @@ int main(int argc, char* argv[]) {
   std::vector<std::pair<Mat2D<float>, Mat2D<float>>> train_ds(
       full_train_data.begin(),
       full_train_data.begin() + full_train_data.size() - num_online_val_steps);
-  std::vector<std::pair<Mat2D<float>, Mat2D<float>>> val_ds(
+  std::vector<std::pair<Mat2D<float>, Mat2D<float>>> online_val_ds(
       full_train_data.begin() + full_train_data.size() - num_online_val_steps,
       full_train_data.end());
 
   const auto test_ds = read_mnist_csv(mnist_test_ds_path, 20, -1);
-  const auto online_val_ds =
-      read_mnist_csv(mnist_test_ds_path, 20, num_online_val_steps);
 
   size_t global_step = 0;
   for (size_t epoch = 0; epoch < num_train_epochs; ++epoch) {
