@@ -1,11 +1,12 @@
 #include "mnist.h"
-#include "utils.h"
 
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <tuple>
 #include <vector>
+
+#include "utils.h"
 std::vector<std::pair<Mat2D<float>, Mat2D<float>>> read_mnist_csv(
     const std::string csv_filename, const size_t batch_size,
     const int64_t num_batches_to_load) {
@@ -56,6 +57,9 @@ std::vector<std::pair<Mat2D<float>, Mat2D<float>>> read_mnist_csv(
   std::cout << "Loaded " << dataset.size() << " batches of " << batch_size
             << " samples. Dropped remainder: " << batch_idx << std::endl;
 
-  std::random_shuffle(dataset.begin(), dataset.end());
+  std::random_device random_device;
+  std::mt19937 gen(random_device());
+
+  std::shuffle(dataset.begin(), dataset.end(), gen);
   return dataset;
 }

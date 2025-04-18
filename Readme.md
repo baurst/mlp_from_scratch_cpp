@@ -55,12 +55,9 @@ make -j4
 ```
 
 ### <a name="run_steps"></a> Steps to Run
+Download MNIST dataset as .csv from [kaggle.com](https://www.kaggle.com/oddrationale/mnist-in-csv).
 
 ```bash
-# download MNIST dataset as .csv (or alternatively from kaggle.com: https://www.kaggle.com/oddrationale/mnist-in-csv)
-wget https://pjreddie.com/media/files/mnist_train.csv
-wget https://pjreddie.com/media/files/mnist_test.csv
-
 # train the classifier by providing absolute paths to datasets as arguments
 ./src/main mnist_train.csv mnist_test.csv
 ```
